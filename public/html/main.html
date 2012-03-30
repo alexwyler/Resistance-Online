@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<title> The Resistance </title>
+</head>
+<body>
+<div id="fb-root"/>
+<div class="fb-login-button">Login with Facebook</div>
+<script
+src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
+</script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/public/js/game_client.js"></script>
+<script>
+window.fbAsyncInit = function () {
+  FB.init({ appId: 326683484060385, cookie: true, xfbml: true, oauth: true });
+  initClient();
+};
+
+(function(d){
+    var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+    js = d.createElement('script'); js.id = id; js.async = true;
+    js.src = "//connect.facebook.net/en_US/all.js";
+    d.getElementsByTagName('head')[0].appendChild(js);
+}(document));
+</script>
+
+<b>Games</b>
+<ul id="games">
+</ul>
+<input type="text" value="New Game Name" id="new_game_name"/>
+<input type="button" value="New Game"'/>
+<hr/>
+<div id="game"/>
+</body>
+</html>
