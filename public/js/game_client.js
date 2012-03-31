@@ -12,21 +12,6 @@ var client = {
     };
   },
 
-  insertNewGame : function(id, name) {
-    $('#games').append(
-      $('<li id="game_' + id + '"/>').append(
-        $('<a href="#"/>')
-          .append(name)
-          .click(
-            function(game_id) {
-              socket.emit('join_game', {
-                auth : this.getAuthParams(),
-                game_id : game_id
-              });
-            }.bind(this, id))
-      ));
-  },
-
   init : function(authParams) {
     this.id = authParams.id;
     this.accessToken = authParams.accessToken;
@@ -50,7 +35,8 @@ var client = {
       }
       if (state.gameData) {
         this.gameData = state.gameData;
-        this.redrawGame();
+        this.renderGameShell();
+        this.renderPlayers();
       }
     }.bind(this));
 
@@ -59,27 +45,46 @@ var client = {
     }.bind(this));
 
     socket.on('delete_game', function(data) {
-      $('#game_' + data.game_id).remove();
+      $('#game_' + data.game.id).remove();
     });
 
-    socket.on('update_lobby', function(gameData) {
+    socket.on('join_complete', function(gameData) {
       this.gameData = gameData;
-      this.redrawGame();
+      this.renderGameShell();
+      this.updateGameStatus();
+      this.renderPlayers();
+    }.bind(this));
+
+    socket.on('player_join', function(data) {
+      this.gameData = data.gameData;
+      this.addPlayerToGame(data.user);
+    }.bind(this));
+
+    socket.on('player_leave', function(data) {
+      this.gameData = data.gameData;
+      this.removePlayerFromGame(data.user);
     }.bind(this));
 
     socket.on('leave_game', function(data) {
       this.gameData = null;
       $('#game').empty();
-    });
+    }.bind(this));
   },
 
-  redrawGame : function() {
+  // rendering
+
+  updateGameStatus : function() {
+    // todo
+  },
+
+  renderGameShell : function() {
     $('#game').empty();
     $('#game').append(
       $('<b> Current Game: ' + this.gameData.name + '</b>'),
       $('<br/>'),
-      'Status: ' + this.gameData.state,
-      $('<ol id="lobby_players"/>'),
+      'Status: ',
+      $('<span id="game_status"/>'),
+      $('<ol id="players"/>'),
       $('<input type="button" value="Leave Game"/>').click(
         function() {
           socket.emit('leave_game', {
@@ -87,22 +92,53 @@ var client = {
           });
         }.bind(this)
       ),
+      $('<div id="ready_container"/>'),
       $('<hr/>')
     );
+  },
 
-    $(this.gameData.players).each(function(idx, uid) {
-      $('#lobby_players').append(
-        $('<li>' + uid + '</li>')
-      );
-    });
-  }
+  renderPlayers : function() {
+    for (uid in this.gameData.players) {
+      this.addPlayerToGame(this.gameData.players[uid]);
+    }
+  },
+
+  addPlayerToGame : function(user) {
+    $('#players').append(
+      $('<li id="player_' + user.id + '">'
+        + user.name
+        + ' -- '
+        + user.state
+        + '</li>')
+    );
+  },
+
+  removePlayerFromGame : function(user) {
+    $('#player_' + user.id).remove();
+  },
+
+  insertNewGame : function(id, name) {
+    $('#games').append(
+      $('<li id="game_' + id + '"/>').append(
+        $('<a href="#"/>')
+          .append(name)
+          .click(
+            function(game_id) {
+              socket.emit('join_game', {
+                auth : this.getAuthParams(),
+                game_id : game_id
+              });
+            }.bind(this, id))
+      ));
+  },
+
 }
 
 function initClient() {
   urlVars = getUrlVars();
   if (urlVars.uid) {
     client.init({
-      id: urlVars.uid
+      id: ("" + urlVars.uid).replace('#', '')
     });
   } else {
     FB.getLoginStatus(function(response) {

@@ -25,66 +25,78 @@ function getUser(authData, socket) {
     user = new User(authData.id);
     users[user.id] = user;
   }
-  sockets[user.id] = socket;
+  user.socket = socket;
   user.disconnected = false;
 
   return user;
+}
+
+function json_pull(object, method) {
+  var ret = {};
+  for (var idx in object) {
+    ret[idx] = object[idx][method]();
+  }
+  return ret;
+}
+
+function json_size(object) {
+  var count = 0;
+  for (idx in object) {
+    count++;
+  }
+  return count;
 }
 
 function User(id) {
   this.id = id;
   this.state = U_STATE.SEARCHING;
   this.name = 'User_' + this.id;
+  this.socket = null;
   this.disconnected = false;
+  this.getClientData = function() {
+    return {
+      id : this.id,
+      name : this.name,
+      state : this.state,
+      disconnected : this.disconnected
+    };
+  };
 }
 
 function Game(game_id, name) {
-  this.players = [];
+  this.players = {};
   this.state = G_STATE.FINDING_PLAYERS;
   this.name = name;
   this.id = game_id;
 
-  this.getPublicData = function() {
-    // todo;
-    return this;
+  this.getPublicClientData = function() {
+    return {
+      id : this.id,
+      name : this.name,
+      players : json_pull(this.players, 'getClientData'),
+      state : this.state
+    };
   };
 
-  this.getDataFor = function(id) {
-    // todo;
-    return this;
+  this.getClientDataFor = function(id) {
+    var ret = this.getPublicClientData();
+    // todo
+    return ret;
   };
 
-  this.add = function(id) {
-    this.players.push(id);
-  }
+  this.add = function(player) {
+    this.players[player.id] = player;
+  };
 
-  this.remove = function(id) {
-    this.players.remove(id);
-  }
-}
-
-function broadcastAll(event, data) {
-  uids = [];
-  for (id in users) {
-    uids.push(id);
-  }
-  broadcast(uids, event, data);
-}
-
-function broadcast(user_ids, event, data) {
-  user_ids.forEach(
-    function(id) {
-      if (sockets[id]) {
-        sockets[id].emit(event, data);
-      }
-    });
+  this.remove = function(player) {
+    delete this.players[player.id];
+  };
 }
 
 // global state
 
 var games = {};
 var users = {};
-var sockets = {};
 
 // user state
 
@@ -111,103 +123,114 @@ var G_STATE = {
 io.sockets.on('connection', function (socket) {
   socket.on('init', function (data) {
     var user = getUser(data.auth, socket);
-    // todo only share public data
+
     ret = {
-      games : games,
-      user : user,
-      users : users
+      user : user.getClientData(),
+      users : json_pull(users, 'getClientData'),
+      games : json_pull(games, 'getPublicClientData')
     };
-    if (user.game_id) {
-      ret.gameData = games[user.game_id].getDataFor(user.id);
+
+    if (user.game) {
+      ret.gameData = user.game.getClientDataFor(user.id);
     }
     socket.emit('init', ret);
   });
 
   socket.on('disconnect', function () {
-    for (var uid in sockets) {
-      if (sockets[uid].id == socket.id) {
-        delete sockets[uid];
-        user = users[uid];
-        if (user) {
-          user.disconnected = true;
-        }
+    for (var uid in users) {
+      var user = users[uid];
+      if (user.socket && user.socket.id == socket.id) {
+        user.socket = null;
+        user.disconnected = true;
       }
     }
   });
 
   socket.on('new_game', function(data) {
     var user = getUser(data.auth, socket);
-    console.log(user);
-    if (user.game_id) {
-      var cur_game = games[user.game_id];
-      if (cur_game && cur_game.state != G_STATE.FINISHED) {
-        socket.emit('error', {
-          msg : "Must finish or quit game before making a new one"
-        });
-        return;
-      }
+    if (user.game && user.game.state != G_STATE.FINISHED) {
+      socket.emit('error', {
+        msg : "Must finish or quit game before making a new one"
+      });
+      return;
     }
+
     var new_game = new Game(nextGameID(), data.name);
     games[new_game.id] = new_game;
     broadcastAll(
       'new_game', {
-        game : new_game
+        game : new_game.getPublicClientData()
       }
     );
-    joinGame(user.id, new_game.id);
+    joinGame(user, new_game);
   });
 
   socket.on('join_game', function(data) {
     var user = getUser(data.auth, socket);
-    if (user.game_id) {
-      var cur_game = games[user.game_id];
-      if (cur_game.state != G_STATE.FINISHED) {
-        socket.emit('error', {
-          msg : "Must finish or quit game before joining a new one"
-        });
-      }
+    if (user.game && user.game.state != G_STATE.FINISHED) {
+      socket.emit('error', {
+        msg : "Must finish or quit game before joining a new one"
+      });
     } else if (!games[data.game_id] ||
                games[data.game_id].state != G_STATE.FINDING_PLAYERS) {
       socket.emit('error', {
         msg : "Game is no longer available"
       });
     } else {
-      joinGame(user.id, data.game_id);
+      var game = games[data.game_id];
+      joinGame(user, game);
     }
   });
 
   socket.on('leave_game', function(data) {
     var user = getUser(data.auth, socket);
-    leaveGame(user.id);
+    leaveGame(user);
   });
 
-  var leaveGame = function(uid) {
-    var user = users[uid];
-    if (user.game_id) {
-      var cur_game = games[user.game_id];
-      if (cur_game) {
-        cur_game.players.remove(user.id);
-      }
-      user.game_id = null;
+  var leaveGame = function(user) {
+    if (user.game) {
+      var game = user.game;
+      game.remove(user);
+      user.game = null;
       socket.emit('leave_game');
-      if (cur_game.players.length > 0) {
-        broadcast(cur_game.players, 'update_lobby', cur_game.getPublicData());
+      if (json_size(game.players) > 0) {
+        broadcast(game.players, 'player_leave', {
+          user : user.getClientData(),
+          gameData : game.getPublicClientData()
+        }, true);
       } else {
-        delete games[cur_game.id];
+        delete games[game.id];
         broadcastAll('delete_game', {
-          game_id : cur_game.id
+          game : game.getPublicClientData()
         });
       }
     }
   };
 
-  var joinGame = function(user_id, game_id) {
-    var user = users[user_id];
-    var game = games[game_id];
-    user.game_id = game_id;
-    game.add(user.id);
-    broadcast(game.players, 'update_lobby', game.getPublicData());
+  var joinGame = function(user, game) {
+    user.game = game;
+    game.add(user);
+    broadcast(game.players, 'player_join', {
+      user : user.getClientData(),
+      game : game.getPublicClientData()
+    }, true);
+    socket.emit('join_complete', game.getPublicClientData());
   };
+
+  var broadcastAll = function(event, data, skip_sender) {
+    broadcast(users, event, data, skip_sender);
+  };
+
+  var broadcast = function(users, event, data, skip_sender) {
+    for (uid in users) {
+      var user = users[uid];
+      if (!user.disconnected &&
+          (!skip_sender || socket.id != user.socket.id)) {
+        user.socket.emit(event, data);
+      }
+    }
+  };
+
 });
 
 Array.prototype.remove =
