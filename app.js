@@ -19,13 +19,11 @@ app.get(
 function User(id) {
   this.id = id;
   this.state = U_STATE.SEARCHING;
-  this.name = 'User_' + this.id;
   this.socket = null;
   this.disconnected = false;
   this.getClientData = function() {
     return {
       id : this.id,
-      name : this.name,
       state : this.state,
       disconnected : this.disconnected
     };
@@ -514,7 +512,7 @@ io.sockets.on(
 
     var broadcastGameData = function(event, game, skip_sender) {
       _.each(
-        game.users,
+        game.players,
         function(user) {
           if (!user.disconnected &&
               (!skip_sender || socket.id != user.socket.id)) {

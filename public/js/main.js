@@ -19,7 +19,7 @@ var ClientView = Backbone.View.extend(
       if (this.model.login(info)) {
         this.currentView = new LobbyView({el:this.$el});
         this.currentView.render();
-      } 
+      }
     },
 
     setGame: function(game) {
@@ -166,16 +166,15 @@ var PlayingView = Backbone.View.extend({
     this.players = new PlayerList(this.model.get('players'));
     this.roster = new RosterView({collection:this.players});
 
-    socket.on('player_join', function(game) {
-      debugger;
+    socket.on('player_join', _(function(game) {
       this.model.set(game);
       this.updatePlayers(game.players);
-    });
+    }).bind(this));
 
-    socket.on('player_leave', function(game) {
+    socket.on('player_leave', _(function(game) {
       this.model.set(game);
       this.updatePlayers(game.players);
-    });
+    }).bind(this));
   },
 
   render: function() {
