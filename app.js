@@ -32,12 +32,14 @@ function User(id) {
   };
 }
 
-function Mission(turn, leader) {
+function Mission(turn, attempt, leader) {
   this.turn = turn;
   this.leader = leader;
+  this.attempt = attempt;
   this.party = {};
   this.votes = {};
   this.mission_actions = {};
+
   this.getClientData = function(secret_vote) {
     return {
       turn : this.turn,
@@ -65,6 +67,17 @@ function Game(game_id, creator_id) {
   this.missions = [];
   this.creator =
   this.spies = [];
+  this.current_votes = {};
+  this.current_mission_actions = {};
+  this.passes = 0;
+  this.fails = 0;
+
+  this.getNextLeader = function() {
+    var cur_leader = this.getCurrentMission().leader;
+    var player_ids = _.keys(this.players);
+    var idx = _.indexOf(player_ids, cur_leader.id);
+    return this.players[((idx+1) % _.size(player_ids))];
+  };
 
   this.getCurrentMission = function() {
     return _.last(this.missions);
@@ -156,6 +169,16 @@ var U_STATE = {
   PLAYING : 'playing'
 };
 
+var VOTE = {
+  YES : 'yes',
+  NO : 'no'
+}
+
+var ACTION = {
+  PASS : 'pass',
+  FAIL : 'fail'
+}
+
 // global state
 
 var games = {};
@@ -197,11 +220,7 @@ io.sockets.on(
         if (user.game && user.game.state != G_STATE.FINISHED) {
           ret.game = user.game.getClientDataFor(user.id);
         } else {
-          ret.game_list = _.map(
-            games,
-            function(game) {
-              return game.getPublicClientData();
-            });
+          ret.game_list = getClientGameListData();
         }
         socket.emit('init', ret);
       }
@@ -301,14 +320,14 @@ io.sockets.on(
 
     socket.on(
       'join_game',
-      function(data) {
+      function(game_id) {
         if (user.game && user.game.state != G_STATE.FINISHED) {
           error("Must finish or quit game before joining a new one");
-        } else if (!games[data.game_id] ||
-                   games[data.game_id].state != G_STATE.FINDING_PLAYERS) {
+        } else if (!games[game_id] ||
+                   games[game_id].state != G_STATE.FINDING_PLAYERS) {
           error("Game is no longer available");
         } else {
-          var game = games[data.game_id];
+          var game = games[game_id];
           joinGame(game);
         }
       });
@@ -323,13 +342,13 @@ io.sockets.on(
         var game = user.game;
         var num_players = json_size(game.players);
         var num_spies = NUM_SPIES[num_players];
-        var player_ids = _.keys(users);
+        var player_ids = _.keys(game.players);
         player_ids = _.shuffle(player_ids);
         for (var i = 0; i < num_spies; i++) {
           game.spies.push(player_ids[i]);
         }
         var leader_idx = Math.floor(Math.random() * num_players);
-        game.missions.push(new Mission(1, users[player_ids[leader_idx]]));
+        game.missions.push(new Mission(1, 1, users[player_ids[leader_idx]]));
         game.state = G_STATE.CHOOSING_MISSION;
         _.each(
           game.players,
@@ -371,24 +390,10 @@ io.sockets.on(
           error("You can only vote in a game after the party has been selected");
           return;
         }
-        var votes =  user.game.getCurrentMission().votes;
+        var votes =  user.game.current_votes;
         votes[user.id] = vote;
         if (_.size(votes) == _.size(user.game.players)) {
-          broadcastGameData('vote_finished');
-        }
-      }
-    );
-
-    socket.on(
-      'vote',
-      function(vote) {
-        if (!user.game || user.game.state != G_STATE.VOTING) {
-          error("You can only vote in a game after the party has been selected");
-          return;
-        }
-        var votes =  user.game.getCurrentMission().votes;
-        votes[user.id] = vote;
-        if (_.size(votes) == _.size(user.game.players)) {
+          resolveVote(user.game);
           broadcastGameData('vote_finished');
         }
       }
@@ -402,17 +407,75 @@ io.sockets.on(
           return;
         }
         var mission = user.game.getCurrentMission();
+        var current_actions = user.game.current_mission_actions;
         if (!mission.party[user.id]) {
           error("You can only mission if you have been chosen on the party");
           return;
         }
-        mission.mission_actions[user.id] = action;
-        if (_.size(mission.mission_action)
+        current_actions[user.id] = action;
+        if (_.size(current_actions)
             == MISSION_SIZE[_.size(user.game.players)][mission.turn]) {
-          broadcastGameData('vote_finished');
+          resolveMission(user.game);
         }
       }
     );
+
+    var resolveVote = function(game) {
+      var votes = game.current_votes;
+      game.current_votes = {};
+      var current_mission = game.getCurrentMission();
+      current_mission.votes = votes;
+      var pass = 0;
+      _.each(
+        votes,
+        function(vote) {
+          pass += vote == VOTE.YES ? 1 : -1;
+        }
+      );
+
+      if (pass <= 0) {
+        game.missions.push(
+          new Mission(current_mission.turn, current_mission.attempt + 1, game.getNextLeader()));
+        game.state = G_STATE.CHOOSING_MISSION;
+        broadcastGameData('vote_fail');
+      } else {
+        game.state = G_STATE.MISSIONING;
+      }
+
+      broadcastGameData('vote_complete');
+    };
+
+    var resolveMission = function(game) {
+      var actions = game.current_actions;
+      game.current_actions = {};
+      var current_mission = game.getCurrentMission();
+      current_mission.mission_actions = actions;
+      var fails = 0;
+      _.each(
+        actions,
+        function(action) {
+          fails += ACTION.FAIL;
+        }
+      );
+
+      var pass = fails < ((current_mission.turn == 4 && _.size(game.players) > 6) ? 2 : 1);
+
+      if (pass) {
+        game.passes += 1;
+      } else {
+        game.fails += 1;
+      }
+
+      var game_over = passes >= 3 || fails >= 3;
+      if (!game_over) {
+        game.missions.push(new Mission(current_mission.turn + 1, 1, game.getNextLeader()));
+        game.state = G_STATE.CHOOSING_MISSION;
+      } else {
+        game.sate = G_STATE.FINISHED;
+      }
+
+      broadcastGameData('mission_complete');
+    };
 
     var joinGame = function(game) {
       user.game = game;
@@ -453,6 +516,14 @@ io.sockets.on(
       });
     };
 
+    var getClientGameListData = function() {
+      return _.map(
+        games,
+        function(game) {
+          return game.getPublicClientData();
+        });
+    };
+
     var broadcastGameList = function(event) {
       _.each(
         users,
@@ -461,11 +532,7 @@ io.sockets.on(
               (!user.game || user.game.state == G_STATE.FINISHED)) {
             user.socket.emit(
               event,
-              _.map(
-                games,
-                function(game) {
-                  return game.getPublicClientData();
-                })
+              getClientGameListData()
             );
           }
         }
