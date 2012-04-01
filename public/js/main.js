@@ -101,7 +101,7 @@ var LobbyView = Backbone.View.extend(
     render: function() {
       this.$el.html(
         $('<div id="lobby_view" class="viewport center"></div>').append(
-          $('<div class="game_info center title layer">Game Lobby</div>')
+          $('<div class="game_info center title layer">Games Lobby</div>')
         ).append(
           this.gamesList.render().el
         ).append(

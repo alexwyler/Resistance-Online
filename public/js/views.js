@@ -206,11 +206,11 @@ var GameView = Backbone.View.extend({
     });
 
     socket.on('player_join', _(function(game) {
-      this.model.players.reset(game.players);
+      this.model.game.players.reset(game.players);
     }).bind(this));
 
     socket.on('player_leave', _(function(game) {
-      this.model.players.reset(game.players);
+      this.model.game.players.reset(game.players);
     }).bind(this));
   },
 
