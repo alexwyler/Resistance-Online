@@ -21,12 +21,14 @@ var ClientView = Backbone.View.extend(
       this.currentView.render();
     },
 
-    setGame: function() {
-      
+    setGame: function(game) {
+      debugger;
+      this.currentView = new PlayingView({el:this.$el, model:new Game(game)});
+      this.currentView.render();
     },
 
     handleError: function(error) {
-      this.currentView = new ErrorView({el:this.$el, error:error});
+      this.currentView = new ErrorView({el:this.$el, error:error.msg});
       this.currentView.render();
     }
   }
@@ -75,17 +77,26 @@ var LobbyView = Backbone.View.extend(
         debugger;
       });
       socket.on('delete_game', function(state) {
-                debugger;
+        debugger;
       });
     },
 
     render: function() {
       this.$el.html(
         $('<div id="lobby_view" class="viewport center"></div>').append(
-          $('<div class="game_info center title layer">Game Lobby</div>'),
+          $('<div class="game_info center title layer">Game Lobby</div>')
+        ).append(
           $('<div id="lobby_games"></div>')
-        )
-      );
+        ).append(
+          $('<div id="new_game" class="button title layer accept full">New Game</div>').click(
+            function(){
+              socket.emit('new_game');
+              socket.on('join_game', function(game) {
+                debugger;
+                clientView.setGame(game);
+              });
+            })
+        ));
     }
   }
 );
