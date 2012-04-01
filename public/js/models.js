@@ -154,6 +154,11 @@ var ClientState = Backbone.Model.extend({
     return false;
   },
 
+  setGame: function(game) {
+    this.game.players.reset(game.players);
+    clientView.setGame();
+  },
+
   getAuthInfo: function() {
     return {
       id: this.my_id,

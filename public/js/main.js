@@ -3,7 +3,7 @@ var socket = io.connect('http://localhost:8080');
 var ClientView = Backbone.View.extend(
   {
     initialize: function() {
-      _(this).bindAll('handleLogin', 'handleError');
+      _(this).bindAll('handleLogin', 'handleError', 'render');
       this.currentView = new LoginView({el:this.$el});
 
       socket.on('error', function(err){
@@ -12,24 +12,24 @@ var ClientView = Backbone.View.extend(
     },
 
     render: function() {
-      this.currentView.render();
+      this.$el.html(this.currentView.render().el);
     },
 
     handleLogin: function(info) {
       if (this.model.login(info)) {
-        this.currentView = new LobbyView({el:this.$el});
-        this.currentView.render();
+        this.currentView = new LobbyView();
+        this.render();
       }
     },
 
     setGame: function(game) {
-      this.currentView = new PlayingView({el:this.$el, model:new Game(game)});
-      this.currentView.render();
+      this.currentView = new GameView({model:clientState});
+      this.render();
     },
 
     handleError: function(error) {
-      this.currentView = new ErrorView({el:this.$el, error:error.msg});
-      this.currentView.render();
+      this.currentView = new ErrorView({error:error.msg});
+      this.render();
     }
   }
 );
@@ -64,6 +64,7 @@ var LoginView = Backbone.View.extend(
             '<div class="fb-login-button center"></div>' +
           '</div>')
       );
+      return this;
     }
 
   }
@@ -81,7 +82,7 @@ var LobbyView = Backbone.View.extend(
           clientView.handleError({msg:"Init Failed"});
         }
         if (obj.game) {
-          clientView.setGame(obj.game);
+          clientState.setGame(obj.game);
         } else {
           me.updateGameList(obj.game_list);
         }
@@ -93,7 +94,7 @@ var LobbyView = Backbone.View.extend(
         me.updateGameList(games);
       });
       socket.on('join_game', function(game) {
-        clientView.setGame(game);
+        clientState.setGame(game);
       });
     },
 
@@ -109,6 +110,7 @@ var LobbyView = Backbone.View.extend(
               socket.emit('new_game');
             })
         ));
+      return this;
     },
 
     updateGameList: function(games) {
@@ -156,49 +158,10 @@ var ErrorView = Backbone.View.extend(
         ).append(
           $('<div class="title"></div>').html(this.options.error)
         ));
+      return this;
     }
   }
 );
-
-var PlayingView = Backbone.View.extend({
-  initialize: function() {
-    _(this).bindAll('render', 'updatePlayers');
-    this.players = new PlayerList(this.model.get('players'));
-    this.roster = new RosterView({collection:this.players});
-
-    socket.on('player_join', _(function(game) {
-      this.model.set(game);
-      this.updatePlayers(game.players);
-    }).bind(this));
-
-    socket.on('player_leave', _(function(game) {
-      this.model.set(game);
-      this.updatePlayers(game.players);
-    }).bind(this));
-  },
-
-  render: function() {
-    this.$el.html(
-      $('<div id="playing_view" class="viewport center"></div>').append(
-        // FIX ME LATER
-        $('<div class="game_info layer">' +
-          '<div id="mission_1" class="token"></div>' +
-          '<div id="mission_2" class="token"></div>' +
-          '<div id="mission_3" class="token"></div>' +
-          '<div id="mission_4" class="token"></div>' +
-          '<div id="mission_5" class="token"></div>' +
-          '</div>')
-      ).append(
-        $('<div class="current_state center title layer">' + this.model.get('state') + '</div>')
-      ).append(
-        this.roster.render().el
-      ));
-    },
-
-    updatePlayers: function(players) {
-      this.players.reset(players);
-    }
-});
 
 $(document).ready(
   function() {
@@ -208,5 +171,4 @@ $(document).ready(
         model: clientState,
         el: $('#root')
       });
-    clientView.render();
 });
