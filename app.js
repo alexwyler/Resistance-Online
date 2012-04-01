@@ -434,7 +434,9 @@ io.sockets.on(
 
       if (pass <= 0) {
         game.missions.push(
-          new Mission(current_mission.turn, current_mission.attempt + 1, game.getNextLeader()));
+          new Mission(
+            current_mission.turn, current_mission.attempt + 1,
+            game.getNextLeader()));
         game.state = G_STATE.CHOOSING_MISSION;
       } else {
         game.state = G_STATE.MISSIONING;
@@ -459,7 +461,8 @@ io.sockets.on(
         }
       );
 
-      var pass = fails < ((current_mission.turn == 4 && _.size(game.players) > 6) ? 2 : 1);
+      var pass = fails < ((current_mission.turn == 4
+                           && _.size(game.players) > 6) ? 2 : 1);
 
       if (pass) {
         game.passes += 1;
