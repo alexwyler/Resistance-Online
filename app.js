@@ -63,7 +63,7 @@ function Game(game_id, creator_id) {
   this.state = G_STATE.FINDING_PLAYERS;
   this.id = game_id;
   this.missions = [];
-  this.creator =
+  this.creator = creator_id;
   this.spies = [];
   this.current_votes = {};
   this.current_mission_actions = {};
@@ -89,6 +89,9 @@ function Game(game_id, creator_id) {
           return player.getClientData();
         }
       ),
+      creator : this.creator.id,
+      passes : this.passes,
+      fails : this.fails,
       missions : _.map(
         this.missions, function(mission) {
           return mission.getClientData();

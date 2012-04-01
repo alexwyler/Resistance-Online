@@ -75,7 +75,7 @@ var CollectionView = Backbone.View.extend({
 var PlayerIconView = Backbone.View.extend({
   tagName: 'span',
   className: 'person',
-                                            
+
   initialize: function() {
     _(this).bindAll('render');
     this.model.on('change', this.render);
@@ -196,7 +196,12 @@ var MissionListView = CollectionView.extend({
 
 var GameView = Backbone.View.extend({
   className: 'viewport',
+  events: {
+    'click #start_game' : 'startGame'
+  },
+
   initialize: function() {
+    _(this).bindAll('updateButton');
     this._rosterView = new RosterView({
       collection: this.model.game.players
     });
@@ -212,6 +217,25 @@ var GameView = Backbone.View.extend({
     socket.on('player_leave', _(function(game) {
       this.model.game.players.reset(game.players);
     }).bind(this));
+
+    this.model.game.players.on('add remove reset', this.updateButton);
+  },
+
+  startGame : function() {
+    socket.emit('start_game');
+  },
+
+  updateButton : function() {
+    console.log(clientState.my_id);
+    console.log(this.model.game.get('creator'));
+    console.log(this.model.game);
+    console.log(this.model.game.players.length);
+    if (clientState.my_id == this.model.game.get('creator')
+        && this.game.players.length > 1) {
+      this.$('#start_game').show();
+    } else {
+      this.$('#start_game').hide();
+    }
   },
 
   render: function() {
@@ -222,12 +246,15 @@ var GameView = Backbone.View.extend({
         '<div data-id="3" class="token"></div>',
         '<div data-id="4" class="token"></div>',
         '<div data-id="5" class="token"></div>',
-      '</div>',
+      '</div>'
     ].join('');
 
     this.$el.html(template);
     this.$el.append(this._missionListView.render().el);
     this.$el.append(this._rosterView.render().el);
+    this.$el.append(
+      $('<div id="start_game" class="hide button title layer accept full">Start Game</div>').hide()
+    );
     return this;
   }
 });
