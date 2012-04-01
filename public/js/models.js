@@ -9,6 +9,37 @@ var MISSION_SIZE = {
   10 : [3, 4, 4, 5, 5]
 };
 
+var G_STATE = {
+  FINDING_PLAYERS : 'finding_players',
+  NOT_READY : 'not_ready',
+  CHOOSING_MISSION : 'choosing_mission',
+  VOTING : 'voting',
+  MISSIONING : 'missioning',
+  FINISHED : 'finished'
+};
+
+var ROLE = {
+  SPY : 'spy',
+  RESISTANCE : 'resistance'
+};
+
+var U_STATE = {
+  SEARCHING : 'searching',
+  NOT_READY : 'not_ready',
+  READY : 'ready',
+  PLAYING : 'playing'
+};
+
+var VOTE = {
+  YES : 'yes',
+  NO : 'no'
+}
+
+var ACTION = {
+  PASS : 'pass',
+  FAIL : 'fail'
+}
+
 var GameInfo = {
   getMissionSize: function(mission) {
     var game_size = clientState.game.players.length;
