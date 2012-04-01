@@ -27,6 +27,10 @@
     }
   ];
 
+  FB.init({
+    appId      : '326683484060385'
+  });
+
   var clientstate = window.clientstate = new ClientState({
     my_id: 693594821
   });
