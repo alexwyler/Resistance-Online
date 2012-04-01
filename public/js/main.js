@@ -16,8 +16,8 @@ var ClientView = Backbone.View.extend(
     },
 
     handleLogin: function(info) {
-      this.model.login(info);
       this.currentView = new LobbyView({el:this.$el});
+      this.model.login(info);
       this.currentView.render();
     },
 
@@ -71,12 +71,21 @@ var LoginView = Backbone.View.extend(
 var LobbyView = Backbone.View.extend(
   {    
     initialize: function() {
-      this.games = new Array();
-      socket.on('new_game', function(game) {
-        debugger;
+      _(this).bindAll('updateGameList');
+      this.games = new GamesList();
+      this.gamesList = new GamesListView({collection:this.games});
+      var me = this;
+      socket.on('init', function(obj) {
+        me.updateGameList(obj.game_list);
       });
-      socket.on('delete_game', function(game) {
-        debugger;
+      socket.on('new_game', function(games) {
+        me.updateGameList(games);
+      });
+      socket.on('delete_game', function(games) {
+        me.updateGameList(games);
+      });
+      socket.on('join_game', function(game) {
+        clientView.setGame(game);
       });
     },
 
@@ -85,24 +94,52 @@ var LobbyView = Backbone.View.extend(
         $('<div id="lobby_view" class="viewport center"></div>').append(
           $('<div class="game_info center title layer">Game Lobby</div>')
         ).append(
-          $('<div id="lobby_games"></div>')
+          this.gamesList.render().el
         ).append(
           $('<div id="new_game" class="button title layer accept full">New Game</div>').click(
             function(){
               socket.emit('new_game');
-              socket.on('join_game', function(game) {
-                clientView.setGame(game);
-              });
             })
         ));
+    },
+
+    updateGameList: function(games) {
+      this.games.reset(games);
     }
   }
 );
 
+var GamesList = Backbone.Collection.extend({
+  model: Game                                             
+});
+
+var GamesListView = CollectionView.extend({
+  createView: function(game) {
+    return new GameInfoView({model:game});
+  }
+});
+
+GameInfoView = Backbone.View.extend({
+
+  initialize: function() {
+    _(this).bindAll('joinGame');
+  },
+
+  render: function() {
+    this.$el.html('<div class="info_view"></div>').append(
+      'players:' + this.model.get('players') +
+      'id:' + this.model.get('id')
+    ).click(this.joinGame);
+  },
+
+  joinGame: function() {
+    socket.emit('join_game', this.model.get('id'));
+  }                                      
+});
+
 var ErrorView = Backbone.View.extend(
   {    
     initialize: function() {
-      _(this).bindAll('render');
     },
     
     render: function() {

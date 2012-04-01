@@ -1,6 +1,6 @@
 var CollectionView = Backbone.View.extend({
   initialize: function() {
-    _(this).bindAll('addItem', 'removeItem');
+    _(this).bindAll('addItem', 'removeItem', 'resetItems');
     this._views = [];
 
     if (this.options.minimumSize > 0) {
@@ -12,6 +12,7 @@ var CollectionView = Backbone.View.extend({
     this.collection.each(this.addItem);
     this.collection.on('add', this.addItem);
     this.collection.on('remove', this.removeItem);
+    this.collection.on('reset', this.resetItems);
   },
 
   addItem: function(item) {
@@ -41,6 +42,14 @@ var CollectionView = Backbone.View.extend({
       placeholder.render();
       this.$el.append(placeholder);
     }
+  },
+
+  resetItems: function() {
+    _(this._views).each(function(view) {
+      view.remove();
+    });
+   this._views = [];
+   this.collection.each(this.addItem);
   },
 
   render: function() {
@@ -137,12 +146,4 @@ var GameView = Backbone.View.extend({
     this.$el.append(this._missionListView.render().el);
     this.$el.append('<button onclick="mock_next(); return false;">Next step</button>');
   }
-});
-
-$(document).ready(function() {
-  var app = new GameView({
-    model: clientstate,
-    el: $('body')
-  });
-  app.render();
 });
