@@ -21,7 +21,19 @@ var Player = Backbone.Model.extend({
   defaults: {
     id: null,
     name: null,
+    full_name: null,
     profile_pic: 'http://profile.ak.fbcdn.net/static-ak/rsrc.php/v1/y9/r/IB7NOFmPw2a.gif'
+  },
+
+  initialize: function() {
+    var me = this;
+    FB.api(this.get('id'), function(data) {
+      me.set('name', data.first_name);
+      me.set('full_name', data.first_name + ' ' + data.last_name);
+    });
+    FB.api(this.get('id') + '/picture', function(data) {
+      me.set('profile_pic', data);
+    });
   }
 });
 
