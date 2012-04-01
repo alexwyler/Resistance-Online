@@ -137,8 +137,9 @@ var ClientState = Backbone.Model.extend({
           auth: this.getAuthInfo()
         }
       );
-
+      return true;
     }
+    return false;
   },
 
   getAuthInfo: function() {

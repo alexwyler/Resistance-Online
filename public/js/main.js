@@ -16,9 +16,10 @@ var ClientView = Backbone.View.extend(
     },
 
     handleLogin: function(info) {
-      this.currentView = new LobbyView({el:this.$el});
-      this.model.login(info);
-      this.currentView.render();
+      if (this.model.login(info)) {
+        this.currentView = new LobbyView({el:this.$el});
+        this.currentView.render();
+      } 
     },
 
     setGame: function(game) {
@@ -76,6 +77,10 @@ var LobbyView = Backbone.View.extend(
       this.gamesList = new GamesListView({collection:this.games});
       var me = this;
       socket.on('init', function(obj) {
+                  debugger;
+        if (obj.user == null) {
+          clientView.handleError({msg:"Init Failed"});
+        }
         me.updateGameList(obj.game_list);
       });
       socket.on('new_game', function(games) {
