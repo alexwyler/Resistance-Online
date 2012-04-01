@@ -342,7 +342,7 @@ io.sockets.on(
           return;
         }
         var game = user.game;
-        var num_players = json_size(game.players);
+        var num_players = _.size(game.players);
         var num_spies = NUM_SPIES[num_players];
         var player_ids = _.keys(game.players);
         player_ids = _.shuffle(player_ids);
@@ -541,29 +541,5 @@ io.sockets.on(
         }
       );
     };
-  });
-
-// Utils
-
-function json_pull(object, method) {
-  var ret = {};
-  for (var idx in object) {
-    ret[idx] = object[idx][method]();
   }
-  return ret;
-}
-
-function json_size(object) {
-  var count = 0;
-  for (idx in object) {
-    count++;
-  }
-  return count;
-}
-
-Array.prototype.remove =
-  function(v) {
-    this.splice(
-      this.indexOf(v) == -1
-        ? this.length : this.indexOf(v), 1);
-  };
+);
