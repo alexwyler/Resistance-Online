@@ -90,6 +90,7 @@ var Game = Backbone.Model.extend({
     id: null,
     missions: null,
     players: null,
+    creator: null,
     roles: null,
     state: ''
   },
