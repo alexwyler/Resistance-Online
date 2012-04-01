@@ -17,6 +17,10 @@ var ClientView = Backbone.View.extend(
       socket.on('player_leave', _(function(game) {
         this.model.game.players.reset(game.players);
       }).bind(this));
+
+      socket.on('start_game', _(function(game) {
+        // HERE 
+      }).bind(this));
     },
 
     render: function() {

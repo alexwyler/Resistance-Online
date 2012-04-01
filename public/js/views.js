@@ -204,6 +204,9 @@ var GameView = Backbone.View.extend({
     this._missionListView = new MissionListView({
       collection: this.model.game.missions,
     });
+    this.model.game.on('change', _(function() {
+      this.$el.addClass(this.model.game.get('state'));
+    })).bind(this);
   },
 
   render: function() {

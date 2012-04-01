@@ -115,3 +115,9 @@ body > button {
 .button.reject {
   background: red;
 }
+
+.error_state {
+  height: 40px;
+  background: red;
+  z-index: 9;
+}
