@@ -1,22 +1,19 @@
 var socket = io.connect('http://localhost:8080');
 
-var ClientModel = Backbone.Model.extend(
-  {
-    defaults: {
-      loggedIn: false,
-      uid: null,
-      currentGame: null,
-    }
-  }
-);
-
 var ClientView = Backbone.View.extend(
   {
     initialize: function() {
-      this.currentView = new LoginView({el:$('body')});
+      _(this).bindAll('handleLogin');
+      this.currentView = new LoginView({el:this.$el});
     },
 
     render: function() {
+      this.currentView.render();
+    },
+
+    handleLogin: function(info) {
+      this.model.login(info);
+      this.currentView = new LobbyView({el:this.$el});
       this.currentView.render();
     }
   }
@@ -32,28 +29,34 @@ var LoginView = Backbone.View.extend(
                   cookie     : true, // enable cookies to allow the server to access the session
                   xfbml      : true  // parse XFBML
                 });
-        FB.Event.subscribe('auth.statusChange', initClient);
+        FB.Event.subscribe('auth.statusChange', clientView.handleLogin);
       };
-      (function(d){
-         var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-         if (d.getElementById(id)) {return;}
-         js = d.createElement('script'); js.id = id; js.async = true;
-         js.src = "//connect.facebook.net/en_US/all.js";
-         ref.parentNode.insertBefore(js, ref);
-       }(document));
     },
-    render: function() {
-      this.$el.setContent(
-        $('#login_page').addClass('viewport center').append(
 
-        )
+    render: function() {
+      this.$el.html(
+        $('<div id="login_page" class="viewport center">' + 
+            '<br/>  <br/>  <br/>' +
+            '<h1 class="center">The Resistance</h1>' +
+            '<br/>  <br/>  <br/>' +
+            '<div class="fb-login-button center"></div>' +
+          '</div>')
       );
     }
+
   }
 );
 
 var LobbyView = Backbone.View.extend(
   {    
+    render: function() {
+      this.$el.html(
+        $('<div id="lobby_view" class="viewport center"></div>').append(
+          $('<div class="game_info center title layer">Game Lobby</div>'),
+          $('<div id="lobby_games"></div>')
+        )
+      );
+    }
   }
 );
 
@@ -64,10 +67,11 @@ var PlayingView = Backbone.View.extend(
 
 $(document).ready(
   function() {
-    var clientModel = new ClientModel();
-    var clientView = new ClientView(
+    clientState = new ClientState();
+    clientView = new ClientView(
       {
-        model: clientModel,
-        el: $('body')
+        model: clientState,
+        el: $('#root')
       });                    
+    clientView.render();
 });

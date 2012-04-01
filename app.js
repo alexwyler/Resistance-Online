@@ -9,7 +9,7 @@ app.use('/public', express.static(__dirname + '/public'));
 app.get(
   '/',
   function(req, res) {
-    res.sendfile(__dirname + '/public/html/main.html');
+    res.sendfile(__dirname + '/public/html/resistance.html');
   });
 
 // model

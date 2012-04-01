@@ -84,10 +84,14 @@ var Game = Backbone.Model.extend({
 
 var ClientState = Backbone.Model.extend({
   defaults: {
-    my_id: null
+    my_id: null,
+    loggedin: false,
+    accessToken: null,
+    signedRequest: null
   },
 
   initialize: function() {
+    _(this).bindAll('login', 'getAuthInfo');
     this.game = new Game();
     this.self = null;
 
@@ -97,6 +101,26 @@ var ClientState = Backbone.Model.extend({
         me.self = player;
       }
     });
+  },
+                                          
+  login: function(info) {
+    if (info.status == "connected") {
+      this.signedRequest = info.authResponse.signedRequest;
+      this.accessToken = info.authResponse.accessToken;
+      this.my_id = info.authResponse.userID;
+      socket.emit('init', {
+          auth: this.getAuthInfo()
+        }
+      );
+    }
+  },
+
+  getAuthInfo: function() {
+    return {
+      id: this.my_id,
+      accessToken: this.accessToken,
+      signedRequest: this.signedRequest
+    };
   }
 });
 
