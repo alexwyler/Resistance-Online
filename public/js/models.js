@@ -182,16 +182,11 @@ var ClientState = Backbone.Model.extend({
 
   login: function(info) {
     if (info.status == "connected") {
-      this.signedRequest = info.authResponse.signedRequest;
-      this.accessToken = info.authResponse.accessToken;
-      this.my_id = info.authResponse.userID;
-      socket.emit('init', {
-          auth: this.getAuthInfo()
-        }
-      );
-      return true;
+      this.set('signedRequest', info.authResponse.signedRequest);
+      this.set('accessToken', info.authResponse.accessToken);
+      this.set('my_id', info.authResponse.userID);
+      this.trigger('login');
     }
-    return false;
   },
 
   setGame: function(game) {
@@ -204,9 +199,9 @@ var ClientState = Backbone.Model.extend({
 
   getAuthInfo: function() {
     return {
-      id: this.my_id,
-      accessToken: this.accessToken,
-      signedRequest: this.signedRequest
+      id: this.get('my_id'),
+      accessToken: this.get('accessToken'),
+      signedRequest: this.get('signedRequest')
     };
   }
 });

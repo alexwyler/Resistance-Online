@@ -39,5 +39,11 @@ function createSocket(clientState) {
     clientState.game.players.reset(game.players);
   });
 
+  clientState.on('login', function() {
+    socket.emit('init', {
+      auth: clientState.attributes
+    });
+  });
+
   return socket;
 }

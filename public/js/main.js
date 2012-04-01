@@ -2,8 +2,9 @@ var ClientView = Backbone.View.extend(
   {
     initialize: function() {
       _(this).bindAll();
-      this.currentView = new LoginView({el:this.$el});
+      this.currentView = new LoginView();
 
+      this.model.on('login', this.handleLogin);
       this.model.on('join_game', this.setGame);
       this.model.on('error', this.handleError);
     },
@@ -12,11 +13,9 @@ var ClientView = Backbone.View.extend(
       this.$el.html(this.currentView.render().el);
     },
 
-    handleLogin: function(info) {
-      if (this.model.login(info)) {
-        this.currentView = new LobbyView({ model: this.model });
-        this.render();
-      }
+    handleLogin: function() {
+      this.currentView = new LobbyView({ model: this.model });
+      this.render();
     },
 
     setGame: function(game) {
@@ -31,41 +30,23 @@ var ClientView = Backbone.View.extend(
   }
 );
 
-var LoginView = Backbone.View.extend(
-  {
-    initialize: function() {
-      window.fbAsyncInit = function() {
-        FB.init({
-                  appId      : '326683484060385',
-                  status     : true, // check login status
-                  cookie     : true, // enable cookies to allow the server to access the session
-                  xfbml      : true  // parse XFBML
-                });
-        FB.Event.subscribe('auth.statusChange', clientView.handleLogin);
-      };
-      (function(d){
-         var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-         if (d.getElementById(id)) {return;}
-         js = d.createElement('script'); js.id = id; js.async = true;
-         js.src = "//connect.facebook.net/en_US/all.js";
-         ref.parentNode.insertBefore(js, ref);
-       }(document));
-    },
+var LoginView = Backbone.View.extend({
+  initialize: function() {
+  },
 
-    render: function() {
-      this.$el.html(
-        $('<div id="login_page" class="viewport center">' +
-            '<br/>  <br/>  <br/>' +
-            '<h1 class="center">The Resistance</h1>' +
-            '<br/>  <br/>  <br/>' +
-            '<div class="fb-login-button center"></div>' +
-          '</div>')
-      );
-      return this;
-    }
-
+  render: function() {
+    this.$el.html(
+      $('<div id="login_page" class="viewport center">' +
+          '<br/>  <br/>  <br/>' +
+          '<h1 class="center">The Resistance</h1>' +
+          '<br/>  <br/>  <br/>' +
+          '<div class="fb-login-button center"></div>' +
+        '</div>')
+    );
+    return this;
   }
-);
+
+});
 
 var LobbyView = Backbone.View.extend({
   events: {
@@ -145,12 +126,20 @@ var ErrorView = Backbone.View.extend(
   }
 );
 
-$(document).ready(
-  function() {
-    clientState = new ClientState();
-    socket = createSocket(clientState);
-    clientView = new ClientView( {
-      model: clientState,
-      el: $('#root')
+$(document).ready(function() {
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId: '326683484060385',
+      status: true
     });
+    FB.Event.subscribe('auth.statusChange',
+      _(clientState.login).bind(clientState));
+  };
+
+  clientState = new ClientState();
+  socket = createSocket(clientState);
+  clientView = new ClientView( {
+    model: clientState,
+    el: $('#root')
+  });
 });
