@@ -5,9 +5,9 @@ function createSocket(clientState) {
     if (obj.user == null) {
       clientState.trigger('error', { msg: "Init Failed" });
     } else if (obj.game) {
-      clientState.setGame(obj.game);
+      handleJoinGame(obj.game);
     } else {
-      clientState.allGames.reset(obj.game_list);
+      clientState.allGames.add(obj.game_list, { parse: true });
     }
   });
 
@@ -16,19 +16,29 @@ function createSocket(clientState) {
   });
 
   socket.on('new_game', function(games) {
-    clientState.allGames.reset(games);
+    clientState.allGames.add(games, { parse: true });
   });
 
-  socket.on('delete_game', function(games) {
-    clientState.allGames.reset(games);
+  socket.on('delete_game', function(event) {
+    clientState.allGames.remove(event.game.id);
   });
 
-  socket.on('start_game', function(game) {
-    clientState.setGame(game);
-  });
+  socket.on('start_game', handleJoinGame);
+  socket.on('join_game', handleJoinGame);
+  function handleJoinGame(data) {
+    // Ensure the game is in the collection
+    var game = clientState.allGames.get(data.id);
+    if (!game) {
+      game = new Game(data, { parse: true });
+      clientState.allGames.add(game);
+    } else {
+      game.set(game.parse(data));
+    }
+    clientState.didJoinGame(game);
+  }
 
-  socket.on('join_game', function(game) {
-    clientState.setGame(game);
+  socket.on('leave_game', function() {
+    clientState.didLeaveGame();
   });
 
   socket.on('player_join', function(game) {

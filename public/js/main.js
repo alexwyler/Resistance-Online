@@ -6,6 +6,7 @@ var ClientView = Backbone.View.extend(
 
       this.model.on('login', this.handleLogin);
       this.model.on('join_game', this.setGame);
+      this.model.on('leave_game', this.handleLogin);
       this.model.on('error', this.handleError);
     },
 
@@ -49,7 +50,10 @@ var LobbyView = Backbone.View.extend({
   },
 
   initialize: function() {
-    this.gamesList = new GameListView({ collection: this.model.allGames });
+    this.gamesList = new GameListView({
+      collection: this.model.allGames,
+      clientState: this.model
+    });
   },
 
   render: function() {
@@ -67,13 +71,16 @@ var LobbyView = Backbone.View.extend({
   },
 
   newGame: function() {
-    socket.emit('new_game');
+    this.model.createGame();
   }
 });
 
 var GameListView = CollectionView.extend({
   createView: function(game) {
-    return new GameInfoView({ model: game });
+    return new GameInfoView({
+      model: game,
+      clientState: this.options.clientState
+    });
   }
 });
 
@@ -94,7 +101,7 @@ GameInfoView = Backbone.View.extend({
   },
 
   joinGame: function() {
-    socket.emit('join_game', this.model.get('id'));
+    this.options.clientState.joinGame(this.model.get('id'));
   }
 });
 
@@ -124,7 +131,7 @@ $(document).ready(function() {
 
   var clientState = new ClientState();
   socket = createSocket(clientState);
-  var clientView = new ClientView( {
+  var clientView = new ClientView({
     model: clientState,
     el: $('#root')
   });

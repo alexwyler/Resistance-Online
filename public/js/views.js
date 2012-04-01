@@ -212,25 +212,17 @@ var GameView = Backbone.View.extend({
 
     this.model.game.players.on('add remove reset', this.updateButton);
 
-    socket.on('player_join', _(function(game) {
-      this.model.game.players.reset(game.players);
-    }).bind(this));
-
-    socket.on('player_leave', _(function(game) {
-      this.model.game.players.reset(game.players);
-    }).bind(this));
-
     this.model.game.on('change', _(function() {
       this.$el.addClass(this.model.game.get('state'));
     }).bind(this));
   },
 
   startGame : function() {
-    socket.emit('start_game');
+    this.model.game.startGame();
   },
 
   updateButton : function() {
-    if (clientState.my_id == this.model.game.get('creator')
+    if (this.model.my_id == this.model.game.get('creator')
         && this.model.game.players.length > 1) {
       this.$('#start_game').show();
     } else {
