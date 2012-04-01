@@ -67,7 +67,7 @@ var Mission = Backbone.Model.extend({
   defaults: {
     turn: null,
     attempt: null,
-    leader_id: null
+    leader: null
   },
 
   initialize: function() {
@@ -77,7 +77,7 @@ var Mission = Backbone.Model.extend({
   },
 
   getLeader: function() {
-    return this.game.getPlayer(this.get('leader_id'));
+    return this.game.getPlayer(this.get('leader'));
   }
 });
 
@@ -92,6 +92,8 @@ var Game = Backbone.Model.extend({
     players: null,
     creator: null,
     roles: null,
+    passes: null,
+    fails: null,
     state: ''
   },
 
