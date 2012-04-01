@@ -3,13 +3,15 @@ var app = express.createServer();
 var io = require('socket.io').listen(app);
 var fs = require('fs');
 var _ = require('underscore');
+var facebook = require('./facebook');
+var APP_SUCRETS = '420e28e9c2977c1affbe0c084d95ada4';
 
 app.listen(8080);
 app.use('/public', express.static(__dirname + '/public'));
 app.get(
   '/',
   function(req, res) {
-    res.sendfile(__dirname + '/public/html/main.html');
+    res.sendfile(__dirname + '/public/html/resistance.html');
   });
 
 // model
@@ -171,16 +173,31 @@ io.sockets.on(
     socket.on(
       'init',
       function (data) {
+        var signed_data = facebook.parse_fbsr(data.auth.signedRequest, APP_SUCRETS);
+        if (signed_data && signed_data.user_id) {
+          var uid = signed_data.user_id;
+          user = users[uid];
+          if (!user) {
+            user = new User(uid);
+          }
+          user.socket = socket;
+          user.disconnected = false;
+        } else {
+          error("Failed to authenticate user");
+        }
 
-        var user = getUser(data.auth);
         var ret = {
-          user : user.getClientData(),
-          users : json_pull(users, 'getClientData'),
-          games : json_pull(games, 'getPublicClientData')
+          user : user.getClientData()
         };
 
-        if (user.game) {
-          ret.gameData = user.game.getClientDataFor(user.id);
+        if (user.game && user.game.state != G_STATE.FINISHED) {
+          ret.game = user.game.getClientDataFor(user.id);
+        } else {
+          ret.game_list = _.map(
+            games,
+            function(game) {
+              return game.getPublicClientData();
+            });
         }
         socket.emit('init', ret);
       }

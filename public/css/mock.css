@@ -28,7 +28,7 @@ body {
   border: 1px solid grey;
 }
 
-#game_info {
+.game_info {
   width: inherit;
   height: 50px;
   background: grey;
@@ -54,7 +54,7 @@ body {
   border: 1px solid black;
 }
 
-#current_state {
+.current_state {
   height: 40px;
   background: lightgrey;
   z-index: 9;
@@ -75,6 +75,11 @@ body {
   font-weight: bold;
 }
 
-#current_state {
+.current_mission {
   z-index: 8;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 24px;
 }
