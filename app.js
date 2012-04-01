@@ -211,6 +211,7 @@ io.sockets.on(
           user.disconnected = false;
         } else {
           error("Failed to authenticate user");
+          return;
         }
 
         var ret = {
