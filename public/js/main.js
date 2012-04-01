@@ -5,10 +5,7 @@ var ClientView = Backbone.View.extend(
       this.currentView = new LoginView({el:this.$el});
 
       this.model.on('join_game', this.setGame);
-
-      socket.on('error', function(err){
-        clientView.handleError(err);
-      });
+      this.model.on('error', this.handleError);
     },
 
     render: function() {

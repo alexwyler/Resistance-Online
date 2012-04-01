@@ -3,12 +3,16 @@ function createSocket(clientState) {
 
   socket.on('init', function(obj) {
     if (obj.user == null) {
-      clientView.handleError({ msg: "Init Failed" });
+      clientState.trigger('error', { msg: "Init Failed" });
     } else if (obj.game) {
       clientState.setGame(obj.game);
     } else {
       clientState.allGames.reset(obj.game_list);
     }
+  });
+
+  socket.on('error', function(obj) {
+    clientState.trigger('error', obj);
   });
 
   socket.on('new_game', function(games) {
