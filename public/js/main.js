@@ -77,11 +77,14 @@ var LobbyView = Backbone.View.extend(
       this.gamesList = new GamesListView({collection:this.games});
       var me = this;
       socket.on('init', function(obj) {
-                  debugger;
         if (obj.user == null) {
           clientView.handleError({msg:"Init Failed"});
         }
-        me.updateGameList(obj.game_list);
+        if (obj.game) {
+          clientView.setGame(obj.game);
+        } else {
+          me.updateGameList(obj.game_list);
+        }
       });
       socket.on('new_game', function(games) {
         me.updateGameList(games);
@@ -160,7 +163,7 @@ var ErrorView = Backbone.View.extend(
 var PlayingView = Backbone.View.extend({
   initialize: function() {
     _(this).bindAll('render', 'updatePlayers');
-    this.players = new PlayerList();
+    this.players = new PlayerList(this.model.get('players'));
     this.roster = new RosterView({collection:this.players});
 
     socket.on('player_join', function(game) {

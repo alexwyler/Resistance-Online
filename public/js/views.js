@@ -87,7 +87,6 @@ var RosterView = CollectionView.extend({
   tagName: 'ul',
 
   createView: function(player) {
-    debugger;
     return new PlayerIconView({
       model: player,
       tagName: 'li'
