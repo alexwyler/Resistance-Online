@@ -166,9 +166,12 @@ function nextGameID() {
 io.sockets.on(
   'connection',
   function (socket) {
+    var user = null;
+
     socket.on(
       'init',
       function (data) {
+
         var user = getUser(data.auth);
         var ret = {
           user : user.getClientData(),
