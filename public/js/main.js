@@ -137,20 +137,28 @@ var GamesList = Backbone.Collection.extend({
 
 var GamesListView = CollectionView.extend({
   createView: function(game) {
-    return new GameInfoView({model:game});
+    return new GameInfoView({ model: game });
   }
 });
 
 GameInfoView = Backbone.View.extend({
+  className: 'info_view',
+
+  events: {
+    'click': 'joinGame'
+  },
+
   initialize: function() {
     _(this).bindAll('joinGame');
+
+    this._facepileView = new FacepileView({ collection: this.model.players });
   },
 
   render: function() {
-    this.$el.html('<div class="info_view"></div>').append(
-      'players:' + this.model.get('players') +
+    this.$el.html(
       'id:' + this.model.get('id')
-    ).click(this.joinGame);
+    );
+    this.$el.append(this._facepileView.render().el);
   },
 
   joinGame: function() {
@@ -160,16 +168,14 @@ GameInfoView = Backbone.View.extend({
 
 var ErrorView = Backbone.View.extend(
   {
-    initialize: function() {
-    },
-
     render: function() {
-      this.$el.html(
-        $('<div id="error_view" class="viewport center"></div>').append(
-          $('<div class="error_state center title layer">Error</div>')
-        ).append(
-          $('<div class="title"></div>').html(this.options.error)
-        ));
+      var template = [
+        '<div id="error_view" class="viewport center">',
+          '<div class="error_state center title layer">Error</div>',
+          '<div class="title">{{error}}</div>',
+        '</div>'
+      ].join('');
+      this.$el.html(Mustache.render(template, this.options));
       return this;
     }
   }
@@ -178,9 +184,8 @@ var ErrorView = Backbone.View.extend(
 $(document).ready(
   function() {
     clientState = new ClientState();
-    clientView = new ClientView(
-      {
-        model: clientState,
-        el: $('#root')
-      });
+    clientView = new ClientView( {
+      model: clientState,
+      el: $('#root')
+    });
 });
