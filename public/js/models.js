@@ -27,11 +27,11 @@ var Player = Backbone.Model.extend({
 
   initialize: function() {
     var me = this;
-    FB.api(this.get('id'), function(data) {
+    FB.api('/' + this.get('id'), function(data) {
       me.set('name', data.first_name);
       me.set('full_name', data.first_name + ' ' + data.last_name);
     });
-    FB.api(this.get('id') + '/picture', function(data) {
+    FB.api('/' + this.get('id') + '/picture', function(data) {
       me.set('profile_pic', data);
     });
   }

@@ -204,14 +204,6 @@ var GameView = Backbone.View.extend({
     this._missionListView = new MissionListView({
       collection: this.model.game.missions,
     });
-
-    socket.on('player_join', _(function(game) {
-      this.model.game.players.reset(game.players);
-    }).bind(this));
-
-    socket.on('player_leave', _(function(game) {
-      this.model.game.players.reset(game.players);
-    }).bind(this));
   },
 
   render: function() {
