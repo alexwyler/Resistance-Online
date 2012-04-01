@@ -36,6 +36,7 @@ body > button {
   background: #eee;
   border-bottom: 1px solid #666;
   box-shadow: 0 1px 0 0 #aaa;
+  height: 60px;
 }
 
 .navigation .token {
@@ -125,4 +126,24 @@ body > button {
   height: 40px;
   background: red;
   z-index: 9;
+}
+
+.choosing_mission .roster_view {
+  display: none;
+}
+
+.selectable {
+  bottom: 0;
+  cursor: pointer;
+  border: 2px solid black;
+  border-radius: 12px;
+  margin: 5px;
+}
+
+.info_view {
+  border: 2px solid black;
+}
+
+.large {
+  font-size: 22px;
 }

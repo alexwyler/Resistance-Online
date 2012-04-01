@@ -55,19 +55,20 @@ var LobbyView = Backbone.View.extend({
 
   initialize: function() {
     _(this).bindAll('updateGameList');
-
     this.gamesList = new GameListView({ collection: this.model.allGames });
   },
 
   render: function() {
     this.$el.html([
       '<div id="lobby_view" class="viewport center">',
-        '<div class="game_info center title layer">Games Lobby</div>',
+        '<div class="navigator center title layer">',
+          '<div class="title">Games Lobby</div>',
+        '</div>',
         '<div id="new_game" class="button title layer accept full">New Game</div>',
       '</div>',
     ].join(''));
 
-    this.$('#lobby_view').after(this.gamesList.render().el);
+    this.$('.navigator').after(this.gamesList.render().el);
     return this;
   },
 
@@ -87,7 +88,7 @@ var GameListView = CollectionView.extend({
 });
 
 GameInfoView = Backbone.View.extend({
-  className: 'info_view',
+  className: 'info_view selectable',
 
   events: {
     'click': 'joinGame'
@@ -100,9 +101,7 @@ GameInfoView = Backbone.View.extend({
   },
 
   render: function() {
-    this.$el.html(
-      'id:' + this.model.get('id')
-    );
+    this.$el.append('<span class="large">Game ' + this.model.get('id') + '</span>');
     this.$el.append(this._facepileView.render().el);
   },
 
@@ -130,7 +129,8 @@ $(document).ready(function() {
   window.fbAsyncInit = function() {
     FB.init({
       appId: '326683484060385',
-      status: true
+      status: true,
+      xfbml: true
     });
     FB.Event.subscribe('auth.statusChange',
       _(clientState.login).bind(clientState));
@@ -142,4 +142,5 @@ $(document).ready(function() {
     model: clientState,
     el: $('#root')
   });
+  clientView.render();
 });

@@ -90,6 +90,7 @@ var PlayerIconView = Backbone.View.extend({
 
 var RosterView = CollectionView.extend({
   tagName: 'ul',
+  className: 'roster_view',
 
   createView: function(player) {
     return new PlayerIconView({
@@ -249,6 +250,7 @@ var GameView = Backbone.View.extend({
     ].join('');
 
     this.$el.html(template);
+    this.$el.addClass(this.model.game.get('state'));
     this.$el.append(this._missionListView.render().el);
     this.$el.append(this._rosterView.render().el);
     this.$el.append(
