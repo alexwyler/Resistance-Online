@@ -209,6 +209,8 @@ var GameView = Backbone.View.extend({
       collection: this.model.game.missions,
     });
 
+    this.model.game.players.on('add remove reset', this.updateButton);
+
     socket.on('player_join', _(function(game) {
       this.model.game.players.reset(game.players);
     }).bind(this));
@@ -232,7 +234,7 @@ var GameView = Backbone.View.extend({
     console.log(this.model.game);
     console.log(this.model.game.players.length);
     if (clientState.my_id == this.model.game.get('creator')
-        && this.game.players.length > 1) {
+        && this.model.game.players.length > 1) {
       this.$('#start_game').show();
     } else {
       this.$('#start_game').hide();
