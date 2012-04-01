@@ -66,6 +66,10 @@ function Game(game_id, creator_id) {
   this.creator =
   this.spies = [];
 
+  this.getCurrentMission = function() {
+    return _.last(this.missions);
+  };
+
   this.getPublicClientData = function() {
     return {
       id : this.id,
@@ -178,6 +182,7 @@ io.sockets.on(
           user = users[uid];
           if (!user) {
             user = new User(uid);
+            users[uid] = user;
           }
           user.socket = socket;
           user.disconnected = false;
@@ -290,11 +295,7 @@ io.sockets.on(
         }
         var new_game = new Game(nextGameID(), user);
         games[new_game.id] = new_game;
-        broadcastAll(
-          'new_game', {
-            game : new_game.getPublicClientData()
-          }
-        );
+        broadcastGameList('new_game');
         joinGame(new_game);
       });
 
@@ -359,6 +360,56 @@ io.sockets.on(
                 game : game.getPublicClientData()
               });
           }
+        }
+      }
+    );
+
+    socket.on(
+      'vote',
+      function(vote) {
+        if (!user.game || user.game.state != G_STATE.VOTING) {
+          error("You can only vote in a game after the party has been selected");
+          return;
+        }
+        var votes =  user.game.getCurrentMission().votes;
+        votes[user.id] = vote;
+        if (_.size(votes) == _.size(user.game.players)) {
+          broadcastGameData('vote_finished');
+        }
+      }
+    );
+
+    socket.on(
+      'vote',
+      function(vote) {
+        if (!user.game || user.game.state != G_STATE.VOTING) {
+          error("You can only vote in a game after the party has been selected");
+          return;
+        }
+        var votes =  user.game.getCurrentMission().votes;
+        votes[user.id] = vote;
+        if (_.size(votes) == _.size(user.game.players)) {
+          broadcastGameData('vote_finished');
+        }
+      }
+    );
+
+    socket.on(
+      'mission_act',
+      function(action) {
+        if (!user.game || user.game.state != G_STATE.MISSIONING) {
+          error("You can only mission in a game after the party has been selected");
+          return;
+        }
+        var mission = user.game.getCurrentMission();
+        if (!mission.party[user.id]) {
+          error("You can only mission if you have been chosen on the party");
+          return;
+        }
+        mission.mission_actions[user.id] = action;
+        if (_.size(mission.mission_action)
+            == MISSION_SIZE[_.size(user.game.players)][mission.turn]) {
+          broadcastGameData('vote_finished');
         }
       }
     );
