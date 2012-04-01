@@ -155,7 +155,10 @@ var ClientState = Backbone.Model.extend({
   },
 
   setGame: function(game) {
+    this.game.set(game);
     this.game.players.reset(game.players);
+//    this.game.known_roles.reset(game.roles);
+    this.game.missions.reset(game.missions);
     clientView.setGame();
   },
 
