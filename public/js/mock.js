@@ -56,15 +56,21 @@
     function() {
       // The votes percolate in
       _(game.players.models).each(function(player, i) {
-        var delay = 1000 + Math.random() * 5000;
-        setTimeout(function() {
-          var vote = new Vote({
-            user_id: player.get('id'),
-            in_favor: true
-          });
-          mission.votes.add(vote);
-        }, delay);
-        console.log(player.get('name'), 'votes after', delay);
+        var vote = new Vote({
+          user_id: player.get('id'),
+          in_favor: true
+        });
+        mission.votes.add(vote);
+      });
+    },
+    function() {
+      // Mission actions
+      _(mission.people).each(function(player, i) {
+        var action = new MissionAction({
+          user_id: player.get('id'),
+          mission_action: true
+        });
+        mission.actions.add(action);
       });
     }
   ];

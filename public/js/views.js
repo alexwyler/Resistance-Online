@@ -73,12 +73,12 @@ var CollectionView = Backbone.View.extend({
 });
 
 var PlayerIconView = Backbone.View.extend({
-  tagName: 'div',
-  className: 'player-icon',
+  tagName: 'span',
+  className: 'person',
 
   render: function() {
-    this.$el.html('<img src="' + this.model.get('profile_pic') + '" /> ' +
-      this.model.get('name'));
+    var template = '<img src="{{profile_pic}}" /> {{name}}';
+    this.$el.html(Mustache.render(template, this.model.attributes));
     return this;
   }
 });
@@ -101,23 +101,81 @@ var RosterView = CollectionView.extend({
   }
 });
 
-var MissionView = Backbone.View.extend({
-  initialize: function() {
-    this._leaderView = new PlayerIconView({
-      model: this.model.getLeader()
-    });
-    this._peopleView = new RosterView({
-      collection: this.model.people,
-      minimumSize: GameInfo.getMissionSize(this.model)
+var FacepileView = CollectionView.extend({
+  className: 'facepile',
+
+  createView: function(player) {
+    return new FacepileView.ItemView({
+      model: player
     });
   },
 
+  createPlaceholder: function() {
+    return new FacepileView.PlaceholderView();
+  }
+}, {
+  ItemView: Backbone.View.extend({
+    tagName: 'span',
+    className: 'person',
+
+    render: function() {
+      var template = '<img src="{{profile_pic}}" />';
+      this.$el.html(Mustache.render(template, this.model.attributes));
+      return this;
+    }
+  }),
+
+  PlaceholderView: Backbone.View.extend({
+    tagName: 'span',
+    className: 'person placeholder',
+
+    render: function() {
+      return this;
+    }
+  })
+});
+
+var MissionView = Backbone.View.extend({
+  className: 'mission',
+
+  initialize: function() {
+    _(this).bindAll('render');
+
+    this._leaderView = new PlayerIconView({
+      model: this.model.getLeader()
+    });
+    this._peopleView = new FacepileView({
+      tagName: 'span',
+      collection: this.model.people,
+      minimumSize: GameInfo.getMissionSize(this.model)
+    });
+
+    this.model.on('change', this.render);
+    this.model.votes.on('change add remove', this.render);
+    this.model.actions.on('change add remove', this.render);
+  },
+
   render: function() {
-    this.$el.append('Leader:');
-    this.$el.append(this._leaderView.render().el);
-    this.$el.append('Attempt:' + this.model.get('attempt'));
-    this.$el.append('People:');
-    this.$el.append(this._peopleView.render().el);
+    var template = [
+      '<div class="status"></div>',
+      '<div class="attempt">Attempt: {{attempt}}</div>',
+      '<div class="leader">Leader: </div>',
+      '<div class="people">Mission party: </div>',
+      '<div class="votes">Votes: {{up_votes}} OK | {{down_votes}} No</div>',
+      '<div class="outcome">Outcome: </div>'
+    ].join('');
+
+    var up_votes = this.model.votes.filter(function(v) {
+      return v.get('in_favor');
+    }).length;
+
+    this.$el.html(Mustache.render(template, {
+      attempt: this.model.get('attempt'),
+      up_votes: up_votes,
+      down_votes: this.model.votes.length - up_votes
+    }));
+    this.$('div.leader').append(this._leaderView.render().el);
+    this.$('div.people').append(this._peopleView.render().el);
     // Votes
     // Mission actions
   }
@@ -137,13 +195,25 @@ var GameView = Backbone.View.extend({
       collection: this.model.game.players
     });
     this._missionListView = new MissionListView({
-      collection: this.model.game.missions
+      collection: this.model.game.missions,
+      className: 'mission-list'
     });
   },
 
   render: function() {
-    this.$el.append(this._rosterView.render().el);
+    var template = [
+      '<button onclick="mock_next(); return false;">Next step</button>',
+      '<div class="navigation">',
+        '<div data-id="1" class="token"></div>',
+        '<div data-id="2" class="token"></div>',
+        '<div data-id="3" class="token"></div>',
+        '<div data-id="4" class="token"></div>',
+        '<div data-id="5" class="token"></div>',
+      '</div>',
+    ].join('');
+
+    this.$el.html(template);
     this.$el.append(this._missionListView.render().el);
-    this.$el.append('<button onclick="mock_next(); return false;">Next step</button>');
+    return this;
   }
 });

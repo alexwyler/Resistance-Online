@@ -55,13 +55,13 @@ var Mission = Backbone.Model.extend({
   defaults: {
     turn: null,
     attempt: null,
-    leader_id: null,
+    leader_id: null
   },
 
   initialize: function() {
     this.people = new PlayerList();
     this.votes = new VoteList();
-    this.mission_actions = new MissionAction();
+    this.actions = new MissionActionList();
   },
 
   getLeader: function() {
@@ -127,7 +127,7 @@ var ClientState = Backbone.Model.extend({
       }
     });
   },
-                                          
+
   login: function(info) {
     if (info.status == "connected") {
       this.signedRequest = info.authResponse.signedRequest;

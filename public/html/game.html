@@ -1,12 +1,24 @@
 <!doctype html>
 <html>
 <head>
+  <link rel="stylesheet" type="text/css" href="/public/css/game.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <script type="text/javascript" src="/public/lib/zepto.js"></script>
   <script type="text/javascript" src="/public/lib/underscore.js"></script>
   <script type="text/javascript" src="/public/lib/backbone.js"></script>
+  <script type="text/javascript" src="/public/lib/mustache.js"></script>
   <script type="text/javascript" src="/public/js/models.js"></script>
   <script type="text/javascript" src="/public/js/mock.js"></script>
   <script type="text/javascript" src="/public/js/views.js"></script>
+  <script type="text/javascript">
+  $(document).ready(function() {
+    var app = new GameView({
+      model: clientstate,
+      el: $('<div class="viewport"></div>')
+    });
+    $('body').html(app.render().el);
+  });
+  </script>
 </head>
 <body>
 </body>

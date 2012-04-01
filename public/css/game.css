@@ -1,0 +1,65 @@
+.viewport > button {
+  padding: 10px;
+  position: absolute;
+  margin-left: -100px;
+}
+
+.viewport {
+  height: 420px;
+  width: 320px;
+  border: 10px solid #000;
+  border-radius: 6px;
+  margin: 0 auto;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.navigation {
+  background: #eee;
+  border-bottom: 1px solid #666;
+  box-shadow: 0 1px 0 0 #aaa;
+}
+
+.navigation .token {
+  width: 40px;
+  height: 40px;
+  border: 1px dashed #666;
+  border-radius: 20px;
+  display: inline-block;
+  margin: 10px 10px 5px;
+}
+
+.mission-list {
+  -webkit-box-flex: 1;
+}
+
+.person img {
+  width: 30px;
+  height: 30px;
+}
+
+.mission {
+  line-height: 30px;
+  padding: 10px;
+}
+
+.mission .attempt {
+  float: right;
+  color: #777;
+}
+
+.facepile .person {
+  width: 30px;
+  height: 30px;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 1px;
+}
+
+.facepile .person.placeholder {
+  border: 3px dotted #8af;
+  border-radius: 3px;
+  margin: 2px 3px;
+  width: 20px;
+  height: 20px;
+}
