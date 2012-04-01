@@ -1,0 +1,80 @@
+body {
+  margin: 0;
+}
+
+.center {
+  position: relative;          
+  margin: auto;
+  text-align: center;
+}
+
+.show {
+  display: block;
+}
+
+.hide {
+  display: none;
+}
+
+.layer {
+  box-shadow: 2px 8px 6px -8px black;
+  border-bottom: 1px solid black;
+  position: relative;
+}
+
+.viewport {
+  height: 420px;
+  width: 320px;
+  border: 1px solid grey;
+}
+
+#game_info {
+  width: inherit;
+  height: 50px;
+  background: grey;
+  z-index: 10;
+}
+
+.token {
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+  border: 1px dashed black;
+  float: left;
+  margin: 5px 11px;
+}
+
+.token.pass {
+  background: blue;
+  border: 1px solid black;
+}
+
+.token.fail {
+  background: red;
+  border: 1px solid black;
+}
+
+#current_state {
+  height: 40px;
+  background: lightgrey;
+  z-index: 9;
+}
+
+.actor {
+  font-weight: bold;
+}
+
+.actor img {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+}
+
+.event {
+  padding: 5px;
+  font-weight: bold;
+}
+
+#current_state {
+  z-index: 8;
+}
