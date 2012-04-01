@@ -70,34 +70,37 @@ var LoginView = Backbone.View.extend(
   }
 );
 
-var LobbyView = Backbone.View.extend(
-  {
-    initialize: function() {
-      _(this).bindAll('updateGameList');
+var LobbyView = Backbone.View.extend({
+  events: {
+    'click #new_game': 'newGame'
+  },
 
-      this.gamesList = new GameListView({ collection: this.model.allGames });
-    },
+  initialize: function() {
+    _(this).bindAll('updateGameList');
 
-    render: function() {
-      this.$el.html(
-        $('<div id="lobby_view" class="viewport center"></div>').append(
-          $('<div class="game_info center title layer">Games Lobby</div>')
-        ).append(
-          this.gamesList.render().el
-        ).append(
-          $('<div id="new_game" class="button title layer accept full">New Game</div>').click(
-            function(){
-              socket.emit('new_game');
-            })
-        ));
-      return this;
-    },
+    this.gamesList = new GameListView({ collection: this.model.allGames });
+  },
 
-    updateGameList: function(games) {
-      this.games.reset(games);
-    }
+  render: function() {
+    this.$el.html([
+      '<div id="lobby_view" class="viewport center">',
+        '<div class="game_info center title layer">Games Lobby</div>',
+        '<div id="new_game" class="button title layer accept full">New Game</div>',
+      '</div>',
+    ].join(''));
+
+    this.$('#lobby_view').after(this.gamesList.render().el);
+    return this;
+  },
+
+  newGame: function() {
+    socket.emit('new_game');
+  },
+
+  updateGameList: function(games) {
+    this.games.reset(games);
   }
-);
+});
 
 var GameListView = CollectionView.extend({
   createView: function(game) {
