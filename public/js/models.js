@@ -90,8 +90,6 @@ var MissionList = Backbone.Collection.extend({
 var Game = Backbone.Model.extend({
   defaults: {
     id: null,
-    missions: null,
-    players: null,
     creator: null,
     roles: null,
     passes: null,
@@ -101,7 +99,8 @@ var Game = Backbone.Model.extend({
 
   initialize: function() {
     _(this).bindAll('addItem');
-    this.players = new PlayerList();
+    this.players = new PlayerList(this.get('players'));
+    this.unset('players');
     this.missions = new MissionList();
     this.known_roles = false; // TODO
 
