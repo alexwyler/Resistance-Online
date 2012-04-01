@@ -22,7 +22,6 @@ var ClientView = Backbone.View.extend(
     },
 
     setGame: function(game) {
-      debugger;
       this.currentView = new PlayingView({el:this.$el, model:new Game(game)});
       this.currentView.render();
     },
@@ -73,10 +72,10 @@ var LobbyView = Backbone.View.extend(
   {    
     initialize: function() {
       this.games = new Array();
-      socket.on('new_game', function(state) {
+      socket.on('new_game', function(game) {
         debugger;
       });
-      socket.on('delete_game', function(state) {
+      socket.on('delete_game', function(game) {
         debugger;
       });
     },
@@ -92,7 +91,6 @@ var LobbyView = Backbone.View.extend(
             function(){
               socket.emit('new_game');
               socket.on('join_game', function(game) {
-                debugger;
                 clientView.setGame(game);
               });
             })
@@ -119,7 +117,47 @@ var ErrorView = Backbone.View.extend(
 );
 
 var PlayingView = Backbone.View.extend(
-  {    
+  {
+    initialize: function() {
+      _(this).bindAll('render', 'updatePlayers');
+      socket.on('player_join', function(game) {
+        this.model.set('players', game.players);
+        this.updatePlayers();
+      });
+
+      socket.on('player_leave', function(game) {
+        this.model.set('players', game.players);
+        this.updatePlayers();
+      });
+    },
+    
+    render: function() {
+      this.$el.html(
+        $('<div id="playing_view" class="viewport center"></div>').append(
+          // FIX ME LATER
+          $('<div class="game_info layer">' +
+            '<div id="mission_1" class="token"></div>' +
+            '<div id="mission_2" class="token"></div>'+
+            '<div id="mission_3" class="token"></div>' +
+            '<div id="mission_4" class="token"></div>' +
+            '<div id="mission_5" class="token"></div>' +
+            '</div>')
+        ).append(
+          $('<div class="current_state center title layer">' + this.model.get('state') + '</div>')
+        ).append(
+          $('<div id="current_players"></div>')
+        ));
+      this.updatePlayers();
+    },
+
+    updatePlayers: function() {
+      var players = this.model.get('players');
+      $('#current_players').html('');
+      for (idx in players) {
+        // FIX ME BRO
+        $('#current_players').append(players[idx].name);
+      }
+    }
   }
 );
 

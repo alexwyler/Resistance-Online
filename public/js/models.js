@@ -75,6 +75,11 @@ var MissionList = Backbone.Collection.extend({
 
 var Game = Backbone.Model.extend({
   defaults: {
+    id: null,
+    missions: null,
+    players: null,
+    roles: null,
+    state: ''
   },
 
   initialize: function() {
