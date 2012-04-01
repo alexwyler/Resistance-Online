@@ -216,7 +216,6 @@ var GameView = Backbone.View.extend({
 
   render: function() {
     var template = [
-      '<button onclick="mock_next(); return false;">Next step</button>',
       '<div class="navigation">',
         '<div data-id="1" class="token"></div>',
         '<div data-id="2" class="token"></div>',

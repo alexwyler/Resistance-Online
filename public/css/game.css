@@ -1,7 +1,10 @@
-.viewport > button {
+body {
+  margin: 0;
+}
+
+body > button {
   padding: 10px;
-  position: absolute;
-  margin-left: -100px;
+  display: block;
 }
 
 .viewport {
@@ -12,6 +15,16 @@
   margin: 0 auto;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+}
+
+@media (max-device-width: 480px) {
+  .viewport {
+    border: 0;
+  }
+
+  body > button {
+    position: absolute;
+  }
 }
 
 .navigation {
