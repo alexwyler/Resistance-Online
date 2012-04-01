@@ -221,7 +221,7 @@ var GameView = Backbone.View.extend({
 
     this.model.game.on('change', _(function() {
       this.$el.addClass(this.model.game.get('state'));
-    })).bind(this);
+    }).bind(this));
   },
 
   startGame : function() {
