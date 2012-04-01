@@ -186,6 +186,10 @@ var Game = Backbone.Model.extend({
     return this.players.find(function(p) {
       return p.id == id;
     });
+  },
+
+  getCurrentMission: function() {
+    return this.missions.at(this.missions.length - 1);
   }
 });
 
