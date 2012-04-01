@@ -3,8 +3,12 @@ var socket = io.connect('http://localhost:8080');
 var ClientView = Backbone.View.extend(
   {
     initialize: function() {
-      _(this).bindAll('handleLogin');
+      _(this).bindAll('handleLogin', 'handleError');
       this.currentView = new LoginView({el:this.$el});
+
+      socket.on('error', function(err){
+        clientView.handleError(err);
+      });
     },
 
     render: function() {
@@ -14,6 +18,15 @@ var ClientView = Backbone.View.extend(
     handleLogin: function(info) {
       this.model.login(info);
       this.currentView = new LobbyView({el:this.$el});
+      this.currentView.render();
+    },
+
+    setGame: function() {
+      
+    },
+
+    handleError: function(error) {
+      this.currentView = new ErrorView({el:this.$el, error:error});
       this.currentView.render();
     }
   }
@@ -31,6 +44,13 @@ var LoginView = Backbone.View.extend(
                 });
         FB.Event.subscribe('auth.statusChange', clientView.handleLogin);
       };
+      (function(d){
+         var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement('script'); js.id = id; js.async = true;
+         js.src = "//connect.facebook.net/en_US/all.js";
+         ref.parentNode.insertBefore(js, ref);
+       }(document));
     },
 
     render: function() {
@@ -49,6 +69,16 @@ var LoginView = Backbone.View.extend(
 
 var LobbyView = Backbone.View.extend(
   {    
+    initialize: function() {
+      this.games = new Array();
+      socket.on('new_game', function(state) {
+        debugger;
+      });
+      socket.on('delete_game', function(state) {
+                debugger;
+      });
+    },
+
     render: function() {
       this.$el.html(
         $('<div id="lobby_view" class="viewport center"></div>').append(
@@ -56,6 +86,23 @@ var LobbyView = Backbone.View.extend(
           $('<div id="lobby_games"></div>')
         )
       );
+    }
+  }
+);
+
+var ErrorView = Backbone.View.extend(
+  {    
+    initialize: function() {
+      _(this).bindAll('render');
+    },
+    
+    render: function() {
+      this.$el.html(
+        $('<div id="error_view" class="viewport center"></div>').append(
+          $('<div class="error_state center title layer">Error</div>')
+        ).append(
+          $('<div class="title"></div>').html(this.options.error)
+        ));
     }
   }
 );
