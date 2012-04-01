@@ -174,11 +174,11 @@ var MissionView = Backbone.View.extend({
       return v.get('in_favor');
     }).length;
 
-    this.$el.html(Mustache.render(template, {
+    this.$el.html($('<div class="mission-list"></div>').append(Mustache.render(template, {
       attempt: this.model.get('attempt'),
       up_votes: up_votes,
       down_votes: this.model.votes.length - up_votes
-    }));
+    })));
     this.$('div.leader').append(this._leaderView.render().el);
     this.$('div.people').append(this._peopleView.render().el);
     // Votes
@@ -196,13 +196,13 @@ var MissionListView = CollectionView.extend({
 
 var GameView = Backbone.View.extend({
   className: 'viewport',
+
   initialize: function() {
     this._rosterView = new RosterView({
       collection: this.model.game.players
     });
     this._missionListView = new MissionListView({
       collection: this.model.game.missions,
-      className: 'mission-list'
     });
 
     socket.on('player_join', _(function(game) {
