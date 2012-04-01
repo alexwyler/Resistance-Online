@@ -120,7 +120,6 @@ var GamesListView = CollectionView.extend({
 });
 
 GameInfoView = Backbone.View.extend({
-
   initialize: function() {
     _(this).bindAll('joinGame');
   },
@@ -153,50 +152,46 @@ var ErrorView = Backbone.View.extend(
   }
 );
 
-var PlayingView = Backbone.View.extend(
-  {
-    initialize: function() {
-      _(this).bindAll('render', 'updatePlayers');
-      socket.on('player_join', function(game) {
-        this.model.set('players', game.players);
-        this.updatePlayers();
-      });
+var PlayingView = Backbone.View.extend({
+  initialize: function() {
+    _(this).bindAll('render', 'updatePlayers');
+    this.players = new PlayerList();
+    this.roster = new RosterView({collection:this.players});
 
-      socket.on('player_leave', function(game) {
-        this.model.set('players', game.players);
-        this.updatePlayers();
-      });
-    },
+    socket.on('player_join', function(game) {
+      debugger;
+      this.model.set(game);
+      this.updatePlayers(game.players);
+    });
+
+    socket.on('player_leave', function(game) {
+      this.model.set(game);
+      this.updatePlayers(game.players);
+    });
+  },
     
-    render: function() {
-      this.$el.html(
-        $('<div id="playing_view" class="viewport center"></div>').append(
-          // FIX ME LATER
-          $('<div class="game_info layer">' +
-            '<div id="mission_1" class="token"></div>' +
-            '<div id="mission_2" class="token"></div>'+
-            '<div id="mission_3" class="token"></div>' +
-            '<div id="mission_4" class="token"></div>' +
-            '<div id="mission_5" class="token"></div>' +
-            '</div>')
-        ).append(
-          $('<div class="current_state center title layer">' + this.model.get('state') + '</div>')
-        ).append(
-          $('<div id="current_players"></div>')
-        ));
-      this.updatePlayers();
+  render: function() {
+    this.$el.html(
+      $('<div id="playing_view" class="viewport center"></div>').append(
+        // FIX ME LATER
+        $('<div class="game_info layer">' +
+          '<div id="mission_1" class="token"></div>' +
+          '<div id="mission_2" class="token"></div>' +
+          '<div id="mission_3" class="token"></div>' +
+          '<div id="mission_4" class="token"></div>' +
+          '<div id="mission_5" class="token"></div>' +
+          '</div>')
+      ).append(
+        $('<div class="current_state center title layer">' + this.model.get('state') + '</div>')
+      ).append(
+        this.roster.render().el
+      ));
     },
 
-    updatePlayers: function() {
-      var players = this.model.get('players');
-      $('#current_players').html('');
-      for (idx in players) {
-        // FIX ME BRO
-        $('#current_players').append(players[idx].name);
-      }
+    updatePlayers: function(players) {
+      this.players.reset(players);
     }
-  }
-);
+});
 
 $(document).ready(
   function() {
