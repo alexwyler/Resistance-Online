@@ -60,6 +60,12 @@ body {
   z-index: 9;
 }
 
+.error_state {
+  height: 40px;
+  background: red;
+  z-index: 9;
+}
+
 .actor {
   font-weight: bold;
 }
@@ -82,4 +88,5 @@ body {
 .title {
   font-weight: bold;
   font-size: 24px;
+  padding-top: 10px; 
 }
