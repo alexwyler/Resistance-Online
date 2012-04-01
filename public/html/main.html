@@ -2,34 +2,51 @@
 <html>
 <head>
 <title> The Resistance </title>
+  <link rel="stylesheet" type="text/css" href="/public/css/mock.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 </head>
 <body>
 <div id="fb-root"/>
 <div class="fb-login-button">Login with Facebook</div>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
+<script type="text/javascript" src="/public/lib/zepto.js"></script>
+<script type="text/javascript" src="/public/lib/underscore.js"></script>
+<script type="text/javascript" src="/public/lib/backbone.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/public/js/game_client.js"></script>
+<div id="fb-root"></div>
 <script>
-window.fbAsyncInit = function () {
-  FB.init({ appId: 326683484060385, cookie: true, xfbml: true, oauth: true });
-  initClient();
-};
-
-(function(d){
-    var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
-    js = d.createElement('script'); js.id = id; js.async = true;
-    js.src = "//connect.facebook.net/en_US/all.js";
-    d.getElementsByTagName('head')[0].appendChild(js);
-}(document));
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '326683484060385',
+      status     : true, // check login status
+      cookie     : true, // enable cookies to allow the server to access the session
+      xfbml      : true  // parse XFBML
+    });
+    FB.Event.subscribe('auth.statusChange', initClient);
+  };
+  (function(d){
+     var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement('script'); js.id = id; js.async = true;
+     js.src = "//connect.facebook.net/en_US/all.js";
+     ref.parentNode.insertBefore(js, ref);
+   }(document));
 </script>
 
-<b>Games</b>
-<ul id="games">
-</ul>
-<input type="text" value="New Game Name" id="new_game_name"/>
-<input type="button" value="New Game"'/>
-<hr/>
-<div id="game"/>
+<div id="login_page" class="viewport center show">
+  <br/>  <br/>  <br/>
+  <h1 class="center">The Resistance</h1>
+  <br/>  <br/>  <br/>
+  <div class="fb-login-button center"></div>
+</div>
+
+<div id="lobby_page" class="viewport center hide">
+  <b>Games</b>
+  <ul id="games">
+  </ul>
+  <input type="text" value="New Game Name" id="new_game_name"/>
+  <input type="button" value="New Game"/>
+  <br/>
+  <div id="game"/>
 </body>
 </html>

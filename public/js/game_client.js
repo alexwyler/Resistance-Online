@@ -268,6 +268,8 @@ function initClient() {
           id : response.authResponse.userID,
           accessToken : response.authResponse.accessToken
         });
+        $('#login_page').hide();
+        $('#lobby_page').show();
       } else {
         // I HAVE NO IDEA HOW FACEBOOK PLATFORM WORKS
         alert("log the fuck in and refresh");
