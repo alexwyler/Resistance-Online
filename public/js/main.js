@@ -19,7 +19,7 @@ var ClientView = Backbone.View.extend(
       }).bind(this));
 
       socket.on('start_game', _(function(game) {
-        // HERE 
+        clientState.setGame(game);                            
       }).bind(this));
     },
 

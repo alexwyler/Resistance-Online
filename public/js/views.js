@@ -256,7 +256,7 @@ var GameView = Backbone.View.extend({
     this.$el.append(this._missionListView.render().el);
     this.$el.append(this._rosterView.render().el);
     this.$el.append(
-      $('<div id="start_game" class="hide button title layer accept full">Start Game</div>').hide()
+      $('<div id="start_game" class="hide button title layer accept full center">Start Game</div>')
     );
     return this;
   }
