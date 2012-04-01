@@ -1,8 +1,27 @@
+var MISSION_SIZE = {
+   1 : [1, 1, 1, 1, 1],
+   2 : [2, 2, 2, 2, 2],
+   5 : [2, 3, 2, 3, 3],
+   6 : [2, 3, 4, 3, 4],
+   7 : [2, 3, 3, 4, 4],
+   8 : [3, 4, 4, 5, 5],
+   9 : [3, 4, 4, 5, 5],
+  10 : [3, 4, 4, 5, 5]
+};
+
+var GameInfo = {
+  getMissionSize: function(mission) {
+    var game_size = mission.game.players.length;
+    var mission_number = mission.get('turn');
+    return MISSION_SIZE[game_size][mission_number - 1];
+  }
+};
+
 var Player = Backbone.Model.extend({
   defaults: {
     id: null,
     name: null,
-    profile_pic: null
+    profile_pic: 'http://profile.ak.fbcdn.net/static-ak/rsrc.php/v1/y9/r/IB7NOFmPw2a.gif'
   }
 });
 
@@ -13,11 +32,11 @@ var PlayerList = Backbone.Collection.extend({
 var Vote = Backbone.Model.extend({
   defaults: {
     user_id: null,
-    vote: null
+    in_favor: null
   }
 });
 
-var VoteList = Backbone.Model.extend({
+var VoteList = Backbone.Collection.extend({
   model: Vote
 });
 
@@ -35,6 +54,7 @@ var MissionActionList = Backbone.Model.extend({
 var Mission = Backbone.Model.extend({
   defaults: {
     turn: null,
+    attempt: null,
     leader_id: null,
   },
 

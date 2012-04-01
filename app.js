@@ -61,7 +61,6 @@ function Mission(turn, leader) {
 function Game(game_id, creator_id) {
   this.players = {};
   this.state = G_STATE.FINDING_PLAYERS;
-  this.name = name;
   this.id = game_id;
   this.missions = [];
   this.creator =
@@ -70,7 +69,6 @@ function Game(game_id, creator_id) {
   this.getPublicClientData = function() {
     return {
       id : this.id,
-      name : this.name,
       players : _.map(
         this.players, function(player) {
           return player.getClientData();
@@ -297,7 +295,7 @@ io.sockets.on(
             game : new_game.getPublicClientData()
           }
         );
-        joinGame(user, new_game);
+        joinGame(new_game);
       });
 
     socket.on(
@@ -310,7 +308,7 @@ io.sockets.on(
           error("Game is no longer available");
         } else {
           var game = games[data.game_id];
-          joinGame(user, game);
+          joinGame(game);
         }
       });
 

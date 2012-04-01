@@ -90,3 +90,30 @@ body {
   font-size: 24px;
   padding-top: 10px; 
 }
+
+.button {
+  position: absolute; 
+  bottom: 0;
+  cursor: pointer;
+  border: 2px solid black;
+  border-radius: 12px;
+  margin: 9px;
+  height: 40px;
+}
+
+.button.full {
+  width: 300px;
+}
+
+.button.half {
+  width: 130px;
+  float: left;
+}
+
+.button.accept {
+  background: green;
+}
+
+.button.reject {
+  background: red;
+}

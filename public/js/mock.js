@@ -31,20 +31,46 @@
     my_id: 693594821
   });
 
-  var mission;
+  var game = clientstate.game, mission;
 
-  function add_players() {
-    clientstate.game.players.add(PLAYER_DB);
-    setup_mission();
-  }
+  var mock_steps = [
+    function() {
+      // Set up the players and first mission
+      game.players.add(PLAYER_DB);
 
-  function setup_mission() {
-    mission = new Mission({
-      turn: 1,
-      leader_id: 1341660327
-    });
-    clientstate.game.missions.add(mission);
-  }
+      mission = new Mission({
+        turn: 1,
+        attempt: 1,
+        leader_id: 1341660327
+      });
+      game.missions.add(mission);
+    },
+    function() {
+      // Leader has chosen one of the mission players
+      mission.people.add(game.players.get(1341660327));
+    },
+    function() {
+      // Leader has chosen the mission
+      mission.people.add(game.players.get(1599450468));
+    },
+    function() {
+      // The votes percolate in
+      _(game.players.models).each(function(player, i) {
+        var delay = 1000 + Math.random() * 5000;
+        setTimeout(function() {
+          var vote = new Vote({
+            user_id: player.get('id'),
+            in_favor: true
+          });
+          mission.votes.add(vote);
+        }, delay);
+        console.log(player.get('name'), 'votes after', delay);
+      });
+    }
+  ];
 
-  window.mock_next = add_players;
+  window.mock_next = function() {
+    var func = mock_steps.shift();
+    func();
+  };
 })();
