@@ -437,12 +437,14 @@ io.sockets.on(
         game.missions.push(
           new Mission(current_mission.turn, current_mission.attempt + 1, game.getNextLeader()));
         game.state = G_STATE.CHOOSING_MISSION;
-        broadcastGameData('vote_fail');
       } else {
         game.state = G_STATE.MISSIONING;
       }
-
       broadcastGameData('vote_complete');
+
+      if (current_mission.attempt == 5 && game.state == G_STATE.CHOOSING_MISSION) {
+        broadcastGameData('game_complete');
+      }
     };
 
     var resolveMission = function(game) {
@@ -475,6 +477,10 @@ io.sockets.on(
       }
 
       broadcastGameData('mission_complete');
+
+      if (game_over) {
+        broadcastGameData('game_complete');
+      }
     };
 
     var joinGame = function(game) {
