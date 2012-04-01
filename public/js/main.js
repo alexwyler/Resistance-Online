@@ -19,33 +19,28 @@ var ClientView = Backbone.View.extend(
     },
 
     setGame: function(game) {
-      this.currentView = new GameView({model:clientState});
+      this.currentView = new GameView({ model: this.model });
       this.render();
     },
 
     handleError: function(error) {
-      this.currentView = new ErrorView({error:error.msg});
+      this.currentView = new ErrorView({ error: error.msg });
       this.render();
     }
   }
 );
 
 var LoginView = Backbone.View.extend({
-  initialize: function() {
-  },
-
   render: function() {
     this.$el.html(
-      $('<div id="login_page" class="viewport center">' +
-          '<br/>  <br/>  <br/>' +
-          '<h1 class="center">The Resistance</h1>' +
-          '<br/>  <br/>  <br/>' +
-          '<div class="fb-login-button center"></div>' +
-        '</div>')
-    );
+      '<div id="login_page" class="viewport center">' +
+        '<br/>  <br/>  <br/>' +
+        '<h1 class="center">The Resistance</h1>' +
+        '<br/>  <br/>  <br/>' +
+        '<div class="fb-login-button center"></div>' +
+      '</div>');
     return this;
   }
-
 });
 
 var LobbyView = Backbone.View.extend({
@@ -54,7 +49,6 @@ var LobbyView = Backbone.View.extend({
   },
 
   initialize: function() {
-    _(this).bindAll('updateGameList');
     this.gamesList = new GameListView({ collection: this.model.allGames });
   },
 
@@ -74,10 +68,6 @@ var LobbyView = Backbone.View.extend({
 
   newGame: function() {
     socket.emit('new_game');
-  },
-
-  updateGameList: function(games) {
-    this.games.reset(games);
   }
 });
 
@@ -95,8 +85,6 @@ GameInfoView = Backbone.View.extend({
   },
 
   initialize: function() {
-    _(this).bindAll('joinGame');
-
     this._facepileView = new FacepileView({ collection: this.model.players });
   },
 
@@ -110,20 +98,18 @@ GameInfoView = Backbone.View.extend({
   }
 });
 
-var ErrorView = Backbone.View.extend(
-  {
-    render: function() {
-      var template = [
-        '<div id="error_view" class="viewport center">',
-          '<div class="error_state center title layer">Error</div>',
-          '<div class="title">{{error}}</div>',
-        '</div>'
-      ].join('');
-      this.$el.html(Mustache.render(template, this.options));
-      return this;
-    }
+var ErrorView = Backbone.View.extend({
+  render: function() {
+    var template = [
+      '<div id="error_view" class="viewport center">',
+        '<div class="error_state center title layer">Error</div>',
+        '<div class="title">{{error}}</div>',
+      '</div>'
+    ].join('');
+    this.$el.html(Mustache.render(template, this.options));
+    return this;
   }
-);
+});
 
 $(document).ready(function() {
   window.fbAsyncInit = function() {
@@ -136,9 +122,9 @@ $(document).ready(function() {
       _(clientState.login).bind(clientState));
   };
 
-  clientState = new ClientState();
+  var clientState = new ClientState();
   socket = createSocket(clientState);
-  clientView = new ClientView( {
+  var clientView = new ClientView( {
     model: clientState,
     el: $('#root')
   });
