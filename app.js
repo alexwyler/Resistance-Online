@@ -58,12 +58,13 @@ function Mission(turn, leader) {
   };
 }
 
-function Game(game_id, name) {
+function Game(game_id, creator_id) {
   this.players = {};
   this.state = G_STATE.FINDING_PLAYERS;
   this.name = name;
   this.id = game_id;
   this.missions = [];
+  this.creator =
   this.spies = [];
 
   this.getPublicClientData = function() {
@@ -206,7 +207,6 @@ io.sockets.on(
     socket.on(
       'choose_player',
       function(data) {
-        var user = getUser(data.auth);
         if (!user.game
             || user.game.state != G_STATE.CHOOSING_MISSION) {
           error('You must be in a game choosing mission players to choose players');
@@ -232,7 +232,6 @@ io.sockets.on(
     socket.on(
       'unchoose_player',
       function(data) {
-        var user = getUser(data.auth);
         if (!user.game
             || user.game.state != G_STATE.CHOOSING_MISSION) {
           error('You must be in a game choosing mission players to choose players');
@@ -257,7 +256,6 @@ io.sockets.on(
     socket.on(
       'start_vote',
       function(data) {
-        var user = getUser(data.auth);
         if (!user.game
             || user.game.state != G_STATE.CHOOSING_MISSION) {
           error('You must be in a game choosing mission players to choose players');
@@ -274,58 +272,51 @@ io.sockets.on(
       }
     );
 
-    socket.on('disconnect', function () {
-                for (var uid in users) {
-                  var user = users[uid];
-                  if (user.socket && user.socket.id == socket.id) {
-                    user.socket = null;
-                    user.disconnected = true;
-                  }
-                }
-              });
+    socket.on(
+      'disconnect', function () {
+        for (var uid in users) {
+          var user = users[uid];
+          if (user.socket && user.socket.id == socket.id) {
+            user.socket = null;
+            user.disconnected = true;
+          }
+        }
+      });
 
-    socket.on('new_game', function(data) {
-                var user = getUser(data.auth);
-                if (user.game && user.game.state != G_STATE.FINISHED) {
-                  socket.emit('error', {
-                                msg : "Must finish or quit game before making a new one"
-                              });
-                  return;
-                }
+    socket.on(
+      'new_game',
+      function() {
+        if (user.game && user.game.state != G_STATE.FINISHED) {
+          error("Must finish or quit game before making a new one");
+          return;
+        }
+        var new_game = new Game(nextGameID(), user);
+        games[new_game.id] = new_game;
+        broadcastAll(
+          'new_game', {
+            game : new_game.getPublicClientData()
+          }
+        );
+        joinGame(user, new_game);
+      });
 
-                var new_game = new Game(nextGameID(), data.name);
-                games[new_game.id] = new_game;
-                broadcastAll(
-                  'new_game', {
-                    game : new_game.getPublicClientData()
-                  }
-                );
-                joinGame(user, new_game);
-              });
-
-
-
-    socket.on('join_game', function(data) {
-                var user = getUser(data.auth);
-                if (user.game && user.game.state != G_STATE.FINISHED) {
-                  socket.emit('error', {
-                                msg : "Must finish or quit game before joining a new one"
-                              });
-                } else if (!games[data.game_id] ||
-                           games[data.game_id].state != G_STATE.FINDING_PLAYERS) {
-                  socket.emit('error', {
-                                msg : "Game is no longer available"
-                              });
-                } else {
-                  var game = games[data.game_id];
-                  joinGame(user, game);
-                }
-              });
+    socket.on(
+      'join_game',
+      function(data) {
+        if (user.game && user.game.state != G_STATE.FINISHED) {
+          error("Must finish or quit game before joining a new one");
+        } else if (!games[data.game_id] ||
+                   games[data.game_id].state != G_STATE.FINDING_PLAYERS) {
+          error("Game is no longer available");
+        } else {
+          var game = games[data.game_id];
+          joinGame(user, game);
+        }
+      });
 
     socket.on(
       'start_game',
       function(data) {
-        var user = getUser(data.auth);
         if (user.game && user.game.state != G_STATE.FINDING_PLAYERS) {
           error('Must be in a game that has yet to start');
           return;
@@ -353,38 +344,32 @@ io.sockets.on(
     socket.on(
       'leave_game',
       function(data) {
-        var user = getUser(data.auth);
-        leaveGame(user);
-      });
-
-    var leaveGame = function(user) {
-      if (user.game) {
-        var game = user.game;
-        game.remove(user);
-        user.game = null;
-        socket.emit('leave_game');
-        if (json_size(game.players) > 0) {
-          broadcast(game.players, 'player_leave', {
-                      user : user.getClientData(),
-                      gameData : game.getPublicClientData()
-                    }, true);
-        } else {
-          delete games[game.id];
-          broadcastAll('delete_game', {
-                         game : game.getPublicClientData()
-                       });
+        if (user.game) {
+          var game = user.game;
+          game.remove(user);
+          user.game = null;
+          socket.emit('leave_game');
+          if (_.size(game.players) > 0) {
+            broadcastGameData(
+              'player_leave',
+              game
+            );
+          } else {
+            delete games[game.id];
+            broadcastAll(
+              'delete_game', {
+                game : game.getPublicClientData()
+              });
+          }
         }
       }
-    };
+    );
 
-    var joinGame = function(user, game) {
+    var joinGame = function(game) {
       user.game = game;
       game.add(user);
-      broadcast(game.players, 'player_join', {
-                  user : user.getClientData(),
-                  game : game.getPublicClientData()
-                }, true);
-      socket.emit('join_complete', game.getPublicClientData());
+      broadcastGameData('player_join', game, true);
+      socket.emit('join_game', game.getClientDataFor(user.id));
     };
 
     var error = function(msg) {
@@ -419,20 +404,24 @@ io.sockets.on(
       });
     };
 
-    var getUser = function(authData) {
-      var user = users[authData.id];
-      if (user) {
-        // TODO authenticate
-      } else {
-        user = new User(authData.id);
-        users[user.id] = user;
-      }
-      user.socket = socket;
-      user.disconnected = false;
-
-      return user;
+    var broadcastGameList = function(event) {
+      _.each(
+        users,
+        function(user) {
+          if (!user.disconnected &&
+              (!user.game || user.game.state == G_STATE.FINISHED)) {
+            user.socket.emit(
+              event,
+              _.map(
+                games,
+                function(game) {
+                  return game.getPublicClientData();
+                })
+            );
+          }
+        }
+      );
     };
-
   });
 
 // Utils
