@@ -229,10 +229,6 @@ var GameView = Backbone.View.extend({
   },
 
   updateButton : function() {
-    console.log(clientState.my_id);
-    console.log(this.model.game.get('creator'));
-    console.log(this.model.game);
-    console.log(this.model.game.players.length);
     if (clientState.my_id == this.model.game.get('creator')
         && this.model.game.players.length > 1) {
       this.$('#start_game').show();
