@@ -154,6 +154,10 @@ var Game = Backbone.Model.extend({
   }
 });
 
+var GameList = Backbone.Collection.extend({
+  model: Game
+});
+
 var ClientState = Backbone.Model.extend({
   defaults: {
     my_id: null,
@@ -164,6 +168,7 @@ var ClientState = Backbone.Model.extend({
 
   initialize: function() {
     _(this).bindAll('login', 'getAuthInfo');
+    this.allGames = new GameList();
     this.game = new Game();
     this.self = null;
 
@@ -194,7 +199,7 @@ var ClientState = Backbone.Model.extend({
     this.game.players.reset(game.players);
 //    this.game.known_roles.reset(game.roles);
     this.game.missions.reset(game.missions);
-    clientView.setGame();
+    this.trigger('join_game', this.game);
   },
 
   getAuthInfo: function() {

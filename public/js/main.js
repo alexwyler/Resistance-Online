@@ -1,26 +1,14 @@
-var socket = io.connect('http://localhost:8080');
-
 var ClientView = Backbone.View.extend(
   {
     initialize: function() {
-      _(this).bindAll('handleLogin', 'handleError', 'render');
+      _(this).bindAll();
       this.currentView = new LoginView({el:this.$el});
+
+      this.model.on('join_game', this.setGame);
 
       socket.on('error', function(err){
         clientView.handleError(err);
       });
-
-      socket.on('player_join', _(function(game) {
-        this.model.game.players.reset(game.players);
-      }).bind(this));
-
-      socket.on('player_leave', _(function(game) {
-        this.model.game.players.reset(game.players);
-      }).bind(this));
-
-      socket.on('start_game', _(function(game) {
-        clientState.setGame(game);                            
-      }).bind(this));
     },
 
     render: function() {
@@ -29,7 +17,7 @@ var ClientView = Backbone.View.extend(
 
     handleLogin: function(info) {
       if (this.model.login(info)) {
-        this.currentView = new LobbyView();
+        this.currentView = new LobbyView({ model: this.model });
         this.render();
       }
     },
@@ -86,28 +74,8 @@ var LobbyView = Backbone.View.extend(
   {
     initialize: function() {
       _(this).bindAll('updateGameList');
-      this.games = new GamesList();
-      this.gamesList = new GamesListView({collection:this.games});
-      var me = this;
-      socket.on('init', function(obj) {
-        if (obj.user == null) {
-          clientView.handleError({msg:"Init Failed"});
-        }
-        if (obj.game) {
-          clientState.setGame(obj.game);
-        } else {
-          me.updateGameList(obj.game_list);
-        }
-      });
-      socket.on('new_game', function(games) {
-        me.updateGameList(games);
-      });
-      socket.on('delete_game', function(games) {
-        me.updateGameList(games);
-      });
-      socket.on('join_game', function(game) {
-        clientState.setGame(game);
-      });
+
+      this.gamesList = new GameListView({ collection: this.model.allGames });
     },
 
     render: function() {
@@ -131,11 +99,7 @@ var LobbyView = Backbone.View.extend(
   }
 );
 
-var GamesList = Backbone.Collection.extend({
-  model: Game
-});
-
-var GamesListView = CollectionView.extend({
+var GameListView = CollectionView.extend({
   createView: function(game) {
     return new GameInfoView({ model: game });
   }
@@ -184,6 +148,7 @@ var ErrorView = Backbone.View.extend(
 $(document).ready(
   function() {
     clientState = new ClientState();
+    socket = createSocket(clientState);
     clientView = new ClientView( {
       model: clientState,
       el: $('#root')
