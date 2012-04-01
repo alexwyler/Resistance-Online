@@ -37,7 +37,12 @@ var client = {
         this.gameData = state.gameData;
         this.renderGameShell();
         this.renderPlayers();
+        this.renderGameData();
       }
+    }.bind(this));
+
+    socket.on('error', function(data) {
+      alert(data.msg);
     }.bind(this));
 
     socket.on('new_game', function(data) {
@@ -69,9 +74,117 @@ var client = {
       this.gameData = null;
       $('#game').empty();
     }.bind(this));
+
+    socket.on(
+      'start_game', function(gameData) {
+        this.gameData = gameData;
+        this.renderGameData();
+      }.bind(this)
+    );
+
+    socket.on(
+      'choose_player', function(gameData) {
+        this.gameData = gameData;
+        this.renderGameData();
+      }
+    );
+
+    socket.on(
+      'unchoose_player', function(gameData) {
+        this.gameData = gameData;
+        this.renderGameData();
+      }
+    );
+
+    socket.on(
+      'start_vote', function(gameData) {
+        this.gameData = gameData;
+        this.renderGameData();
+      }
+    );
   },
 
   // rendering
+  renderGameData : function() {
+    console.log(this.gameData);
+    $('#spies').empty();
+    $('#spies').append(
+      'Spies: ' + JSON.stringify(this.gameData.roles)
+    );
+    this.renderMissions();
+  },
+
+  renderMissions : function() {
+    $('#missions').empty();
+    $('#missions').append(
+      JSON.stringify(this.gameData.missions),
+      $('<div id="cur_mission"/>')
+    );
+
+    var cur_mission = _.last(this.gameData.missions);
+    $('#cur_mission').empty();
+    if (this.gameData.state == 'choosing_mission') {
+      $('#cur_mission').append(
+        'Players:',
+        $('<br/>')
+      );
+      _.each(
+        this.gameData.players,
+        function(player) {
+          $('#cur_mission').append(
+            JSON.stringify(player));
+          var checkbox = $('<input type="checkbox"/>');
+          checkbox.change(
+            function(checkbox, player) {
+              console.log(player);
+              console.log(checkbox);
+              if (checkbox.checked) {
+                socket.emit(
+                  'choose_player', {
+                    auth : this.getAuthParams(),
+                    player : player
+                  });
+              } else {
+                socket.emit(
+                  'unchoose_player', {
+                    auth : this.getAuthParams(),
+                    player : player
+                  });
+              }
+            }.bind(this, checkbox, player));
+          $('#cur_mission').append(checkbox);
+        }.bind(this));
+      $('#cur_mission').append(
+        $('<input type="button" value="vote"/>').click(
+          function() {
+            socket.emit(
+              'start_vote', {
+                auth : this.getAuthParams()
+              });
+          }
+        )
+      );
+    } else if (this.gameData.state == 'voting') {
+      $('#cur_mission').append(
+        $('<input type="button" value="YES"/>').click(
+          function() {
+            socket.emit(
+              'vote_yes', {
+                auth : this.getAutParams()
+              });
+          }
+        ),
+        $('<input type="button" value="NO"/>').click(
+          function() {
+            socket.emit(
+              'vote_no', {
+                auth : this.getAutParams()
+              });
+          }
+        )
+      );
+    }
+  },
 
   updateGameStatus : function() {
     // todo
@@ -88,12 +201,21 @@ var client = {
       $('<input type="button" value="Leave Game"/>').click(
         function() {
           socket.emit('leave_game', {
-            'auth' : this.getAuthParams(),
+            'auth' : this.getAuthParams()
           });
         }.bind(this)
       ),
       $('<div id="ready_container"/>'),
-      $('<hr/>')
+      $('<input type="button" value="Start Game"/>').click(
+        function() {
+          socket.emit('start_game', {
+            'auth' : this.getAuthParams()
+          });
+        }.bind(this)
+      ),
+      $('<hr/>'),
+      $('<div id="spies"/>'),
+      $('<div id="missions"/>')
     );
   },
 
@@ -130,12 +252,11 @@ var client = {
               });
             }.bind(this, id))
       ));
-  },
-
+  }
 }
 
 function initClient() {
-  urlVars = getUrlVars();
+  var urlVars = getUrlVars();
   if (urlVars.uid) {
     client.init({
       id: ("" + urlVars.uid).replace('#', '')
