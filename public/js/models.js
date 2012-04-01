@@ -42,9 +42,20 @@ var ACTION = {
 
 var GameInfo = {
   getMissionSize: function(mission) {
-    var game_size = clientState.game.players.length;
+    var game_size = mission.game.players.length;
     var mission_number = mission.get('turn');
     return MISSION_SIZE[game_size][mission_number - 1];
+  }
+};
+
+/**
+ * Extend Backbone.Model to be able to parse collections separately form normal
+ * model attributes.
+ */
+Backbone.Model.prototype.parseCollection = function(data, collection) {
+  if (data[collection]) {
+    this[collection].add(data[collection], { parse: true });
+    delete data[collection];
   }
 };
 
@@ -57,13 +68,19 @@ var Player = Backbone.Model.extend({
   },
 
   initialize: function() {
+    if (this.get('name') === this.defaults.name) {
+      this.fetch();
+    }
+  },
+
+  fetch: function(options) {
     var me = this;
     FB.api('/' + this.get('id'), function(data) {
-      me.set('name', data.first_name);
-      me.set('full_name', data.first_name + ' ' + data.last_name);
+      me.set('name', data.first_name, options);
+      me.set('full_name', data.first_name + ' ' + data.last_name, options);
     });
-    FB.api('/' + this.get('id') + '/picture', function(data) {
-      me.set('profile_pic', data);
+    FB.api('/' + this.get('id') + '/picture?type=square', function(data) {
+      me.set('profile_pic', data, options);
     });
   }
 });
@@ -98,19 +115,26 @@ var Mission = Backbone.Model.extend({
   defaults: {
     turn: null,
     attempt: null,
-    leader: null,
-    party: null,
-    votes: null
+    leader: null
   },
 
-  initialize: function() {
+  constructor: function() {
     this.people = new PlayerList();
     this.votes = new VoteList();
     this.actions = new MissionActionList();
+
+    Backbone.Model.apply(this, arguments);
+  },
+
+  parse: function(data) {
+    this.parseCollection(data, 'people');
+    this.parseCollection(data, 'votes');
+    this.parseCollection(data, 'actions');
+    return data;
   },
 
   getLeader: function() {
-    return clientState.game.getPlayer(this.get('leader'));
+    return this.game.getPlayer(this.get('leader'));
   }
 });
 
@@ -128,16 +152,27 @@ var Game = Backbone.Model.extend({
     state: ''
   },
 
-  initialize: function() {
+  constructor: function() {
     _(this).bindAll('addItem');
-    this.players = new PlayerList(this.get('players'));
-    this.unset('players');
+
+    this.players = new PlayerList();
     this.missions = new MissionList();
     this.known_roles = false; // TODO
 
-    var me = this;
     this.players.on('add', this.addItem);
     this.missions.on('add', this.addItem);
+
+    return Backbone.Model.apply(this, arguments);
+  },
+
+  parse: function(data) {
+    this.parseCollection(data, 'players');
+    this.parseCollection(data, 'missions');
+    return data;
+  },
+
+  startGame: function() {
+    socket.emit('start_game');
   },
 
   /**
@@ -154,6 +189,10 @@ var Game = Backbone.Model.extend({
   }
 });
 
+var GameList = Backbone.Collection.extend({
+  model: Game
+});
+
 var ClientState = Backbone.Model.extend({
   defaults: {
     my_id: null,
@@ -164,8 +203,35 @@ var ClientState = Backbone.Model.extend({
 
   initialize: function() {
     _(this).bindAll('login', 'getAuthInfo');
-    this.game = new Game();
+    this.allGames = new GameList();
+    this.game = null;
     this.self = null;
+  },
+
+  login: function(info) {
+    if (info.status == "connected") {
+      this.set('signedRequest', info.authResponse.signedRequest);
+      this.set('accessToken', info.authResponse.accessToken);
+      this.set('my_id', info.authResponse.userID);
+      this.trigger('login');
+    }
+  },
+
+  createGame: function() {
+    socket.emit('new_game');
+  },
+
+  joinGame: function(id) {
+    socket.emit('join_game', id);
+  },
+
+  leaveGame: function() {
+    this.game = null;
+    socket.emit('leave_game');
+  },
+
+  didJoinGame: function(game) {
+    this.game = game;
 
     var me = this;
     this.game.players.on('add', function(player) {
@@ -173,35 +239,20 @@ var ClientState = Backbone.Model.extend({
         me.self = player;
       }
     });
+
+    this.trigger('join_game', this.game);
   },
 
-  login: function(info) {
-    if (info.status == "connected") {
-      this.signedRequest = info.authResponse.signedRequest;
-      this.accessToken = info.authResponse.accessToken;
-      this.my_id = info.authResponse.userID;
-      socket.emit('init', {
-          auth: this.getAuthInfo()
-        }
-      );
-      return true;
-    }
-    return false;
-  },
-
-  setGame: function(game) {
-    this.game.set(game);
-    this.game.players.reset(game.players);
-//    this.game.known_roles.reset(game.roles);
-    this.game.missions.reset(game.missions);
-    clientView.setGame();
+  didLeaveGame: function() {
+    this.game.set(this.defaults);
+    this.trigger('leave_game');
   },
 
   getAuthInfo: function() {
     return {
-      id: this.my_id,
-      accessToken: this.accessToken,
-      signedRequest: this.signedRequest
+      id: this.get('my_id'),
+      accessToken: this.get('accessToken'),
+      signedRequest: this.get('signedRequest')
     };
   }
 });
