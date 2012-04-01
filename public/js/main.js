@@ -56,7 +56,7 @@ var LoginView = Backbone.View.extend(
 
     render: function() {
       this.$el.html(
-        $('<div id="login_page" class="viewport center">' + 
+        $('<div id="login_page" class="viewport center">' +
             '<br/>  <br/>  <br/>' +
             '<h1 class="center">The Resistance</h1>' +
             '<br/>  <br/>  <br/>' +
@@ -69,7 +69,7 @@ var LoginView = Backbone.View.extend(
 );
 
 var LobbyView = Backbone.View.extend(
-  {    
+  {
     initialize: function() {
       _(this).bindAll('updateGameList');
       this.games = new GamesList();
@@ -110,7 +110,7 @@ var LobbyView = Backbone.View.extend(
 );
 
 var GamesList = Backbone.Collection.extend({
-  model: Game                                             
+  model: Game
 });
 
 var GamesListView = CollectionView.extend({
@@ -133,14 +133,14 @@ GameInfoView = Backbone.View.extend({
 
   joinGame: function() {
     socket.emit('join_game', this.model.get('id'));
-  }                                      
+  }
 });
 
 var ErrorView = Backbone.View.extend(
-  {    
+  {
     initialize: function() {
     },
-    
+
     render: function() {
       this.$el.html(
         $('<div id="error_view" class="viewport center"></div>').append(
@@ -169,7 +169,7 @@ var PlayingView = Backbone.View.extend({
       this.updatePlayers(game.players);
     });
   },
-    
+
   render: function() {
     this.$el.html(
       $('<div id="playing_view" class="viewport center"></div>').append(
@@ -200,6 +200,6 @@ $(document).ready(
       {
         model: clientState,
         el: $('#root')
-      });                    
+      });
     clientView.render();
 });
