@@ -352,12 +352,7 @@ io.sockets.on(
         var leader_idx = Math.floor(Math.random() * num_players);
         game.missions.push(new Mission(1, 1, users[player_ids[leader_idx]]));
         game.state = G_STATE.CHOOSING_MISSION;
-        _.each(
-          game.players,
-          function(user) {
-            user.socket.emit('start_game', game.getClientDataFor(user.id));
-          }
-        );
+        broadcastGameData('start_game', game);
       }
     );
 
@@ -370,10 +365,7 @@ io.sockets.on(
           user.game = null;
           socket.emit('leave_game');
           if (_.size(game.players) > 0) {
-            broadcastGameData(
-              'player_leave',
-              game
-            );
+            broadcastGameData('player_leave', game);
           } else {
             delete games[game.id];
             broadcastAll(
