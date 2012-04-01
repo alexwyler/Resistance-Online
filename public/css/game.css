@@ -12,6 +12,7 @@ body > button {
 }
 
 .viewport {
+  position: relative;
   height: 420px;
   width: 320px;
   border: 10px solid #000;
