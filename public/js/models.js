@@ -11,7 +11,7 @@ var MISSION_SIZE = {
 
 var GameInfo = {
   getMissionSize: function(mission) {
-    var game_size = mission.game.players.length;
+    var game_size = clientState.game.players.length;
     var mission_number = mission.get('turn');
     return MISSION_SIZE[game_size][mission_number - 1];
   }
@@ -67,7 +67,9 @@ var Mission = Backbone.Model.extend({
   defaults: {
     turn: null,
     attempt: null,
-    leader: null
+    leader: null,
+    party: null,
+    votes: null
   },
 
   initialize: function() {
@@ -77,7 +79,7 @@ var Mission = Backbone.Model.extend({
   },
 
   getLeader: function() {
-    return this.game.getPlayer(this.get('leader'));
+    return clientState.game.getPlayer(this.get('leader'));
   }
 });
 
