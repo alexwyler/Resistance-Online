@@ -147,7 +147,7 @@ ResistanceGame.prototype.startGame = function(creator) {
   this.state = G_STATE.CHOOSING_MISSION;
 }
 
-ResistanceGame.vote = function(player, vote) {
+ResistanceGame.prototype.vote = function(player, vote) {
   this.assertState(G_STATE.VOTING);
   this.assertPlayerInGame(player);
   var votes =  player.game.current_votes;
@@ -157,7 +157,7 @@ ResistanceGame.vote = function(player, vote) {
   }
 }
 
-ResistanceGame.resolveVote = function() {
+ResistanceGame.prototype.resolveVote = function() {
   var votes = this.current_votes;
   this.current_votes = {};
   var current_mission = this.getCurrentMission();
@@ -236,7 +236,7 @@ ResistanceGame.prototype.assertPlayerIsLeader = function(leader) {
   }
 }
 
-ResistanceGame.prototype.assertUserOnMission = function(player) {
+ResistanceGame.prototype.assertPlayerOnMission = function(player) {
   this.assertPlayerInGame(player);
   var mission = this.getCurrentMission();
   if (!_.contains(mission.party, player)) {

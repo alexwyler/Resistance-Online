@@ -57,7 +57,7 @@ Game.prototype.assertPlayerInGame = function(player) {
   }
 }
 
-Game.prototype.assertUserIsCreator = function(creator) {
+Game.prototype.assertPlayerIsCreator = function(creator) {
   this.assertPlayerInGame(creator);
   if (this.creator.id != creator.id) {
     throw new Error('Player must be creator');
