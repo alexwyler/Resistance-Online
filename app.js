@@ -5,21 +5,9 @@ var fs = require('fs');
 var _ = require('underscore');
 var facebook = require('./facebook');
 var resistance = require('./resistance');
+var lobby = require('./lobby');
 
 var APP_SUCRETS = '420e28e9c2977c1affbe0c084d95ada4';
-
-// global state -- TODO: make GameList export
-
-var User = resistance.User;
-var users = {};
-
-var Game = resistance.Game;
-var games = {};
-
-var NEXT_GAME_ID = 1;
-function nextGameID() {
-  return NEXT_GAME_ID++;
-}
 
 // listeners
 
@@ -73,10 +61,10 @@ io.sockets.on(
         var signed_data = facebook.parse_fbsr(data.auth.signedRequest, APP_SUCRETS);
         if (signed_data && signed_data.user_id) {
           var uid = signed_data.user_id;
-          user = users[uid];
+          user = lobby.users[uid];
           if (!user) {
-            user = new User(uid);
-            users[uid] = user;
+            user = new SocketPlayer(uid, socket);
+            lobby.users[uid] = user;
           }
           user.socket = socket;
           user.disconnected = false;
@@ -89,7 +77,7 @@ io.sockets.on(
         };
 
         if (user.game && !user.game.isFinished()) {
-          ret.game = user.game.getDataFor(user.id);
+          ret.game = user.game.getKnownData(user.id);
         } else {
           ret.game_list = getClientGameListData();
         }
@@ -101,7 +89,7 @@ io.sockets.on(
       'choose_player',
       function(player_id) {
         user.assertInGame();
-        user.game.choosePlayerForMission(user, users[player_id]);
+        user.game.choosePlayerForMission(user, lobby.users[player_id]);
         broadcastGameData('choose_player', true);
       }
     );
@@ -110,7 +98,7 @@ io.sockets.on(
       'unchoose_player',
       function(data) {
         user.assertInGame();
-        user.game.unchoosePlayerForMission(user, users[player_id]);
+        user.game.unchoosePlayerForMission(user, lobby.users[player_id]);
         broadcastGameData('unchoose_player', true);
       }
     );
@@ -126,7 +114,7 @@ io.sockets.on(
 
     socket.on(
       'disconnect', function () {
-        _.each(users, function(user) {
+        _.each(lobby.users, function(user) {
           if (user.socket && user.socket.id == socket.id) {
             user.socket = null;
             user.disconnected = true;
@@ -138,22 +126,22 @@ io.sockets.on(
       'new_game',
       function() {
         user.assertNotInActiveGame();
-        var new_game = new Game(nextGameID(), user);
-        games[new_game.id] = new_game;
+        var new_game = new resistance.ResistanceGame(lobby.nextGameID(), user);
+        lobby.games[new_game.id] = new_game;
         broadcastGameList('new_game');
         new_game.addPlayer(user);
-        socket.emit('join_game', new_game.getDataFor(user.id));
+        socket.emit('join_game', new_game.getKnownData(user.id));
       });
 
     socket.on(
       'join_game',
       function(game_id) {
         user.assertNotInActiveGame();
-        var game = games[game_id];
+        var game = lobby.games[game_id];
         game.addPlayer(user);
 
         broadcastGameData('player_join', game, true);
-        socket.emit('join_game', game.getDataFor(user.id));
+        socket.emit('join_game', game.getKnownData(user.id));
       }
     );
 
@@ -174,7 +162,7 @@ io.sockets.on(
         if (_.size(game.players) > 0) {
           broadcastGameData('player_leave', game);
         } else {
-          delete games[game.id];
+          delete lobby.games[game.id];
           broadcastAll(
             'delete_game', {
               game : game.getPublicData()
@@ -217,7 +205,7 @@ io.sockets.on(
     };
 
     var broadcastAll = function(event, data, skip_sender) {
-      broadcast(users, event, data, skip_sender);
+      broadcast(lobby.users, event, data, skip_sender);
     };
 
     var broadcast = function(users, event, data, skip_sender) {
@@ -236,22 +224,22 @@ io.sockets.on(
         function(user) {
           if (!user.disconnected &&
               (!skip_sender || socket.id != user.socket.id)) {
-            user.socket.emit(event, game.getDataFor(user.id));
+            user.socket.emit(event, game.getKnownData(user.id));
         }
       });
     };
 
     var getClientGameListData = function() {
       return _.map(
-        games,
+        lobby.games,
         function(game) {
-          return game.getPublicData();
+          return game.getKnownData();
         });
     };
 
     var broadcastGameList = function(event) {
       _.each(
-        users,
+        lobby.users,
         function(user) {
           if (!user.disconnected &&
               (!user.game || user.game.state == G_STATE.FINISHED)) {
@@ -265,3 +253,19 @@ io.sockets.on(
     };
   }
 );
+
+function SocketPlayer(id, socket) {
+  lobby.Player.call(this, id);
+  this.socket = socket;
+}
+
+SocketPlayer.prototype = new lobby.Player();
+SocketPlayer.prototype.constructor = SocketPlayer;
+
+SocketPlayer.prototype.getData = function() {
+  return {
+    id : this.id,
+    state : this.state,
+    disconnected : this.disconnected,
+  };
+};
