@@ -61,10 +61,10 @@ io.sockets.on(
         var signed_data = facebook.parse_fbsr(data.auth.signedRequest, APP_SUCRETS);
         if (signed_data && signed_data.user_id) {
           var uid = signed_data.user_id;
-          user = lobby.users[uid];
+          user = lobby.players[uid];
           if (!user) {
             user = new SocketPlayer(uid, socket);
-            lobby.users[uid] = user;
+            lobby.players[uid] = user;
           }
           user.socket = socket;
           user.disconnected = false;
@@ -89,7 +89,7 @@ io.sockets.on(
       'choose_player',
       function(player_id) {
         user.assertInGame();
-        user.game.choosePlayerForMission(user, lobby.users[player_id]);
+        user.game.choosePlayerForMission(user, lobby.players[player_id]);
         broadcastGameData('choose_player', true);
       }
     );
@@ -98,7 +98,7 @@ io.sockets.on(
       'unchoose_player',
       function(data) {
         user.assertInGame();
-        user.game.unchoosePlayerForMission(user, lobby.users[player_id]);
+        user.game.unchoosePlayerForMission(user, lobby.players[player_id]);
         broadcastGameData('unchoose_player', true);
       }
     );
@@ -114,7 +114,7 @@ io.sockets.on(
 
     socket.on(
       'disconnect', function () {
-        _.each(lobby.users, function(user) {
+        _.each(lobby.players, function(user) {
           if (user.socket && user.socket.id == socket.id) {
             user.socket = null;
             user.disconnected = true;
@@ -139,7 +139,6 @@ io.sockets.on(
         user.assertNotInActiveGame();
         var game = lobby.games[game_id];
         game.addPlayer(user);
-
         broadcastGameData('player_join', game, true);
         socket.emit('join_game', game.getKnownData(user.id));
       }
@@ -205,7 +204,7 @@ io.sockets.on(
     };
 
     var broadcastAll = function(event, data, skip_sender) {
-      broadcast(lobby.users, event, data, skip_sender);
+      broadcast(lobby.players, event, data, skip_sender);
     };
 
     var broadcast = function(users, event, data, skip_sender) {
@@ -239,7 +238,7 @@ io.sockets.on(
 
     var broadcastGameList = function(event) {
       _.each(
-        lobby.users,
+        lobby.players,
         function(user) {
           if (!user.disconnected &&
               (!user.game || user.game.state == G_STATE.FINISHED)) {

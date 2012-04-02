@@ -77,12 +77,12 @@ function nextGameID() {
   return NEXT_GAME_ID++;
 }
 var games = {};
-var users = {};
+var players = {};
 
 module.exports = {
-  games : games,
-  users : users,
-  Player : Player,
   Game : Game,
+  Player : Player,
+  games : games,
+  players : players,
   nextGameID : nextGameID
 };

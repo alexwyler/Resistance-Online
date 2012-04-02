@@ -39,7 +39,7 @@ function Mission(turn, attempt, leader) {
 
 function ResistanceGame(game_id, creator_id) {
   lobby.Game.call(this, game_id, creator_id);
-  this.state = null;
+  this.state = G_STATE.FINDING_PLAYERS;
   this.missions = [];
   this.spies = [];
   this.current_votes = {};
