@@ -119,7 +119,7 @@ var Mission = Backbone.Model.extend({
   },
 
   constructor: function() {
-    this.people = new PlayerList();
+    this.party = new PlayerList();
     this.votes = new VoteList();
     this.actions = new MissionActionList();
 
@@ -127,7 +127,7 @@ var Mission = Backbone.Model.extend({
   },
 
   parse: function(data) {
-    this.parseCollection(data, 'people');
+    this.parseCollection(data, 'party');
     this.parseCollection(data, 'votes');
     this.parseCollection(data, 'actions');
     return data;

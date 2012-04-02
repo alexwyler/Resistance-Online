@@ -152,7 +152,7 @@ var MissionView = Backbone.View.extend({
     });
     this._peopleView = new FacepileView({
       tagName: 'span',
-      collection: this.model.people,
+      collection: this.model.party,
       minimumSize: GameInfo.getMissionSize(this.model)
     });
 
