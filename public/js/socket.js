@@ -25,6 +25,19 @@ function createSocket(clientState) {
 
   socket.on('start_game', handleJoinGame);
   socket.on('join_game', handleJoinGame);
+
+  socket.on('choose_player', function(player_id) {
+    var game = clientState.game;
+    game.missions.last().party.add(
+      game.players.get(player_id)
+    );
+  });
+
+  socket.on('choose_player', function(player_id) {
+    var game = clientState.game;
+    game.missions.last().party.remove(player_id);
+  });
+
   function handleJoinGame(data) {
     // Ensure the game is in the collection
     var game = clientState.allGames.get(data.id);

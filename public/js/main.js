@@ -137,3 +137,11 @@ $(document).ready(function() {
   });
   clientView.render();
 });
+
+
+function test() {
+  socket.emit('leave_game');
+  socket.emit('new_game');
+  socket.emit('start_game');
+  socket.emit('choose_player', 1599450468);
+}

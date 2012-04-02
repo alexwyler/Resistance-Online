@@ -90,16 +90,16 @@ io.sockets.on(
       function(player_id) {
         user.assertInGame();
         user.game.choosePlayerForMission(user, lobby.players[player_id]);
-        broadcastGameData('choose_player', true);
+        broadcastToGame(user.game, 'choose_player', player_id);
       }
     );
 
     socket.on(
       'unchoose_player',
-      function(data) {
+      function(player_id) {
         user.assertInGame();
         user.game.unchoosePlayerForMission(user, lobby.players[player_id]);
-        broadcastGameData('unchoose_player', true);
+        broadcastToGame(user.game, 'unchoose_player', player_id);
       }
     );
 
@@ -165,7 +165,8 @@ io.sockets.on(
           broadcastAll(
             'delete_game', {
               game : game.getPublicData()
-            });
+            }
+          );
         }
       }
     );
@@ -217,7 +218,14 @@ io.sockets.on(
       }
     };
 
+    var broadcastToGame = function(game, event, data, skip_sender) {
+      broadcast(game.players, event, data, skip_sender);
+    }
+
     var broadcastGameData = function(event, game, skip_sender) {
+      if (!game) {
+        game = user.game;
+      }
       _.each(
         game.players,
         function(user) {

@@ -33,7 +33,7 @@ function Mission(turn, attempt, leader) {
   };
 
   this.missionSize = function(game) {
-    return MISSION_SIZE[_.size(game.players)][mission.turn - 1];
+    return MISSION_SIZE[_.size(game.players)][this.turn - 1];
   }
 }
 
@@ -99,19 +99,18 @@ ResistanceGame.prototype.getCurrentMission = function() {
   return _.last(this.missions);
 }
 
-ResistanceGame.prototype.choosePlayerForMission = function(leader, user) {
+ResistanceGame.prototype.choosePlayerForMission = function(leader, player) {
   this.assertState(G_STATE.CHOOSING_MISSION);
   this.assertPlayerIsLeader(leader);
-  this.assertPlayerInGame(user);
+  this.assertPlayerInGame(player);
 
   var mission = this.getCurrentMission();
-  if (mission.partySize() >= mission.missionSize()) {
+  if (mission.partySize() >= mission.missionSize(leader.game)) {
     throw new Error('Cannot choose more players for this mission');
   }
 
-  mission.party[data.player.id] = data.player;
+  mission.party[player.id] = player;
 }
-
 
 ResistanceGame.prototype.unchoosePlayerForMission = function(leader, player) {
   this.assertState(G_STATE.CHOOSING_MISSION);
@@ -119,7 +118,7 @@ ResistanceGame.prototype.unchoosePlayerForMission = function(leader, player) {
   this.assertPlayerInGame(player);
 
   var mission = this.getCurrentMission();
-  delete mission.party[data.player.id];
+  delete mission.party[player.id];
 }
 
 ResistanceGame.prototype.callMissionPartyToVote = function(leader) {
