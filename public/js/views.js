@@ -40,7 +40,7 @@ var CollectionView = Backbone.View.extend({
       var placeholder = this.createPlaceholder();
       this._views.push(placeholder);
       placeholder.render();
-      this.$el.append(placeholder);
+      this.$el.append(placeholder.el);
     }
   },
 
