@@ -162,11 +162,7 @@ io.sockets.on(
           broadcastGameData('player_leave', game);
         } else {
           delete lobby.games[game.id];
-          broadcastAll(
-            'delete_game', {
-              game : game.getPublicData()
-            }
-          );
+          broadcastAll('delete_game', game.id);
         }
       }
     );

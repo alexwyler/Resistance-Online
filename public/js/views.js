@@ -202,7 +202,7 @@ var GameView = Backbone.View.extend({
   },
 
   initialize: function() {
-    _(this).bindAll('updateButton');
+    _(this).bindAll('updateStartButton');
     this._rosterView = new RosterView({
       collection: this.model.game.players
     });
@@ -210,7 +210,7 @@ var GameView = Backbone.View.extend({
       collection: this.model.game.missions,
     });
 
-    this.model.game.players.on('add remove reset', this.updateButton);
+    this.model.game.players.on('add remove reset', this.updateStartButton);
 
     this.model.game.on('change', _(function() {
       this.$el.addClass(this.model.game.get('state'));
@@ -221,12 +221,12 @@ var GameView = Backbone.View.extend({
     this.model.game.startGame();
   },
 
-  updateButton : function() {
-    if (this.model.my_id == this.model.game.get('creator')
-        && this.model.game.players.length > 1) {
-      this.$('#start_game').show();
+  updateStartButton : function() {
+    if (this.model.get('my_id') == this.model.game.get('creator')
+        && this.model.game.players.length > 0) {
+      this.startButton.show();
     } else {
-      this.$('#start_game').hide();
+      this.startButton.hide();
     }
   },
 
@@ -245,9 +245,13 @@ var GameView = Backbone.View.extend({
     this.$el.addClass(this.model.game.get('state'));
     this.$el.append(this._missionListView.render().el);
     this.$el.append(this._rosterView.render().el);
-    this.$el.append(
-      $('<div id="start_game" class="hide button title layer accept full center">Start Game</div>')
-    );
+    this.startButton =
+      $('<div id="start_game" class="button title layer accept full center">' +
+        'Start Game' +
+        '</div>'
+       );
+    this.$el.append(this.startButton);
+    this.updateStartButton();
     return this;
   }
 });

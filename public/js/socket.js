@@ -19,8 +19,8 @@ function createSocket(clientState) {
     clientState.allGames.add(games, { parse: true });
   });
 
-  socket.on('delete_game', function(event) {
-    clientState.allGames.remove(event.game.id);
+  socket.on('delete_game', function(game_id) {
+    clientState.allGames.remove(game_id);
   });
 
   socket.on('start_game', handleJoinGame);
