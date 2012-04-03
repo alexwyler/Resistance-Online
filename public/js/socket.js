@@ -3,7 +3,7 @@ function createSocket(clientState) {
 
   socket.on('init', function(obj) {
     if (obj.user == null) {
-      clientState.trigger('error', { msg: "Init Failed" });
+      clientState.trigger('error', { msg: "Login Failed" });
     } else if (obj.game) {
       handleJoinGame(obj.game);
     } else {
@@ -28,12 +28,13 @@ function createSocket(clientState) {
 
   socket.on('choose_player', function(player_id) {
     var game = clientState.game;
-    game.missions.last().party.add(
+    var party = game.missions.last().party;
+    party.add(
       game.players.get(player_id)
     );
   });
 
-  socket.on('choose_player', function(player_id) {
+  socket.on('unchoose_player', function(player_id) {
     var game = clientState.game;
     game.missions.last().party.remove(player_id);
   });
