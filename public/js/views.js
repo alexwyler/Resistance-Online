@@ -141,29 +141,81 @@ var FacepileView = CollectionView.extend({
   })
 });
 
+/**
+ * Renders the status part of a particular mission.
+ */
+var MissionStatusView = Backbone.View.extend({
+  className: 'status',
+
+  initialize: function() {
+    _(this).bindAll();
+  },
+
+  render: function() {
+    var state = this.model.getState();
+    if (state == MISSION_STATES.FUTURE) {
+      this.$el.html('This mission hasn\'t happened yet.');
+
+    } else if (state == MISSION_STATES.SKIPPED) {
+      this.$el.html('This mission was voted down.');
+
+    } else if (state == MISSION_STATES.PASSED) {
+      this.$el.html('This mission passed.');
+
+    } else if (state == MISSION_STATES.FAILED) {
+      this.$el.html('This mission failed.');
+
+    } else if (state == MISSION_STATES.CHOOSING_PEOPLE) {
+      this.$el.html('Choose people for this mission.');
+
+    } else if (state == MISSION_STATES.WAITING_FOR_PEOPLE) {
+      this.$el.html(this.model.getLeader().get('name') +
+        ' is choosing people for this mission.');
+
+    } else if (state == MISSION_STATES.VOTING) {
+      this.$el.html('Vote on this mission.');
+
+    } else if (state == MISSION_STATES.ON_MISSION) {
+      this.$el.html('Play your mission action.');
+
+    } else if (state == MISSION_STATES.WAITING_FOR_RESULTS) {
+      this.$el.html('Waiting for mission results.');
+
+    }
+
+    return this;
+  }
+});
+
 var MissionView = Backbone.View.extend({
   className: 'mission',
 
   initialize: function() {
-    _(this).bindAll('render');
+    _(this).bindAll();
 
-    this._leaderView = new PlayerIconView({
-      model: this.model.getLeader()
-    });
+    this.game = this.model.game;
+
+    this._statusView = new MissionStatusView({ model: this.model });
+    this._leaderView = new PlayerIconView({ model: this.model.getLeader() });
     this._peopleView = new FacepileView({
       tagName: 'span',
       collection: this.model.party,
       minimumSize: GameInfo.getMissionSize(this.model)
     });
 
-    this.model.on('change', this.render);
-    this.model.votes.on('change add remove', this.render);
-    this.model.actions.on('change add remove', this.render);
+    this.game.on('change', this.refresh);
+    this.model.on('change', this.refresh);
+    this.model.votes.on('change add remove', this.refresh);
+    this.model.actions.on('change add remove', this.refresh);
+  },
+
+  refresh: function() {
+    this.$el.attr('class', 'mission ' + this.model.getState());
+    this._statusView.render();
   },
 
   render: function() {
     var template = [
-      '<div class="status"></div>',
       '<div class="attempt">Attempt: {{attempt}}</div>',
       '<div class="leader">Leader: </div>',
       '<div class="people">Mission party: </div>',
@@ -175,19 +227,24 @@ var MissionView = Backbone.View.extend({
       return v.get('in_favor');
     }).length;
 
-    this.$el.html($('<div class="mission-list"></div>').append(Mustache.render(template, {
+    this.$el.html(Mustache.render(template, {
       attempt: this.model.get('attempt'),
       up_votes: up_votes,
       down_votes: this.model.votes.length - up_votes
-    })));
+    }));
+    this.$el.prepend(this._statusView.render().el);
     this.$('div.leader').append(this._leaderView.render().el);
     this.$('div.people').append(this._peopleView.render().el);
     // Votes
     // Mission actions
+
+    this.refresh();
   }
 });
 
 var MissionListView = CollectionView.extend({
+  className: 'mission-list',
+
   createView: function(mission) {
     return new MissionView({
       model: mission
@@ -207,7 +264,7 @@ var GameView = Backbone.View.extend({
       collection: this.model.game.players
     });
     this._missionListView = new MissionListView({
-      collection: this.model.game.missions,
+      collection: this.model.game.missions
     });
 
     this.model.game.players.on('add remove reset', this.updateStartButton);
