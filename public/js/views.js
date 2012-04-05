@@ -2,14 +2,10 @@ var CollectionView = Backbone.View.extend({
   initialize: function() {
     _(this).bindAll('addItem', 'removeItem', 'resetItems');
     this._views = [];
+    this._currentSize = 0;
 
-    if (this.options.minimumSize > 0) {
-      for (var i = 0; i < this.options.minimumSize; i++) {
-        this._views.push(this.createPlaceholder());
-      }
-    }
+    this.resetItems();
 
-    this.collection.each(this.addItem);
     this.collection.on('add', this.addItem);
     this.collection.on('remove', this.removeItem);
     this.collection.on('reset', this.resetItems);
@@ -18,15 +14,16 @@ var CollectionView = Backbone.View.extend({
   addItem: function(item) {
     var view = this.createView(item);
     view.render();
-    if (this.collection.length <= this.options.minimumSize) {
-      this._views.splice(this.collection.length - 1, 0, view);
-      this.$el.insertBefore(view.el, this._views[this.collection.length].el);
+    if (this._currentSize < this.options.minimumSize) {
+      this._views.splice(this._currentSize, 0, view);
+      view.$el.insertBefore(this._views[this._currentSize + 1].el);
       var placeholder = this._views.pop();
       placeholder.remove();
     } else {
       this._views.push(view);
       this.$el.append(view.el);
     }
+    this._currentSize++;
     return this;
   },
 
@@ -36,7 +33,8 @@ var CollectionView = Backbone.View.extend({
     })[0];
     this._views = _(this._views).without(viewToRemove);
     viewToRemove.$el.remove();
-    if (this.collection.length < this.options.minimumSize) {
+    this._currentSize--;
+    if (this._currentSize < this.options.minimumSize) {
       var placeholder = this.createPlaceholder();
       this._views.push(placeholder);
       placeholder.render();
@@ -48,8 +46,17 @@ var CollectionView = Backbone.View.extend({
     _(this._views).each(function(view) {
       view.remove();
     });
-   this._views = [];
-   this.collection.each(this.addItem);
+    this._views = [];
+    this._currentSize = 0;
+
+    if (this.options.minimumSize > 0) {
+      for (var i = 0; i < this.options.minimumSize; i++) {
+        this._views.push(this.createPlaceholder());
+      }
+    }
+    this.render();
+
+    this.collection.each(this.addItem);
   },
 
   render: function() {
