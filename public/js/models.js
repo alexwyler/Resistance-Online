@@ -22,6 +22,18 @@ var M_STATE = {
   FINISHED : 'finished'
 };
 
+var MISSION_STATES = {
+  FUTURE: 'future',
+  WAITING_FOR_PEOPLE: 'waiting-for-people',
+  CHOOSING_PEOPLE: 'choosing-people',
+  VOTING: 'voting',
+  ON_MISSION: 'on-mission',
+  WAITING_FOR_RESULTS: 'waiting-for-results',
+  SKIPPED: 'skipped',
+  PASSED: 'passed',
+  FAILED: 'failed'
+};
+
 var ROLE = {
   SPY : 'spy',
   RESISTANCE : 'resistance'
@@ -53,7 +65,7 @@ var GameInfo = {
 };
 
 /**
- * Extend Backbone.Model to be able to parse collections separately form normal
+ * Extend Backbone.Model to be able to parse collections separately from normal
  * model attributes.
  */
 Backbone.Model.prototype.parseCollection = function(data, collection) {
@@ -139,14 +151,11 @@ var Mission = Backbone.Model.extend({
     return data;
   },
 
-  // dirty hacks for now
-
-  isClientLeader: function() {
-    return this.get('leader') == my_id;
-  },
-
-  isClientOnMission: function() {
-    return this.party.get(my_id);
+  compareTo: function(other) {
+    if (this.get('turn') != other.get('turn')) {
+      return other.get('turn') - this.get('turn');
+    }
+    return other.get('attempt') - this.get('attempt');
   },
 
   getLeader: function() {
@@ -163,7 +172,72 @@ var Mission = Backbone.Model.extend({
 
   startVote: function() {
     socket.emit('start_vote');
-  }
+  },
+
+  isPassing: function() {
+    // XXX(rpatterson): handle the special 4th mission
+    return this.actions.all(function(action) {
+      action.get('mission_action') == ACTION.PASS;
+    });
+  },
+
+  isClientLeader: function() {
+    return this.get('leader') == my_id;
+  },
+
+  /**
+   * Calculate the state that this mission view is currently in, based on the
+   * local player and the game's state.
+   */
+  getState: function() {
+    var game_state = this.game.get('state');
+    var local_player = this.game.self;
+    var relation_to_current_mission =
+      this.compareTo(this.game.getCurrentMission());
+
+    // Is this a future mission?
+    if (relation_to_current_mission != 0 &&
+        this.votes.length == 0) {
+      return MISSION_STATES.FUTURE;
+
+    // Is this a previous, skipped mission?
+    } else if (relation_to_current_mission != 0 &&
+               this.actions.length == 0) {
+      return MISSION_STATES.SKIPPED;
+
+    // Is this a previous, passed mission?
+    } else if (relation_to_current_mission != 0 &&
+               this.isPassing()) {
+      return MISSION_STATES.PASSED;
+
+    // Is this a previous, failed mission?
+    } else if (relation_to_current_mission != 0 &&
+               !this.isPassing()) {
+      return MISSION_STATES.FAILED;
+
+    // Are we the leader, choosing people?
+    } else if (game_state == G_STATE.CHOOSING_MISSION &&
+               this.getLeader() == local_player) {
+      return MISSION_STATES.CHOOSING_PEOPLE;
+
+    // Are we waiting for the leader to choose people?
+    } else if (game_state == G_STATE.CHOOSING_MISSION) {
+      return MISSION_STATES.WAITING_FOR_PEOPLE;
+
+    // Are we voting on the proposal?
+    } else if (game_state == G_STATE.VOTING) {
+        return MISSION_STATES.VOTING;
+
+    // Are we on this mission?
+    } else if (game_state == G_STATE.MISSIONING &&
+               this.people.get(local_player.id)) {
+      return MISSION_STATES.ON_MISSION;
+
+    // We must be waiting for the mission results
+    } else {
+      return MISSION_STATES.WAITING_FOR_RESULTS;
+    }
+  },
 });
 
 var MissionList = Backbone.Collection.extend({
@@ -173,6 +247,7 @@ var MissionList = Backbone.Collection.extend({
 var Game = Backbone.Model.extend({
   defaults: {
     id: null,
+    local_player_id: null,
     creator: null,
     roles: null,
     passes: null,
@@ -181,14 +256,18 @@ var Game = Backbone.Model.extend({
   },
 
   constructor: function() {
-    _(this).bindAll('addItem');
+    _(this).bindAll();
 
     this.players = new PlayerList();
     this.missions = new MissionList();
     this.known_roles = false; // TODO
 
-    this.players.on('add', this.addItem);
-    this.missions.on('add', this.addItem);
+    this.players.on('add', this._addItem);
+    this.missions.on('add', this._addItem);
+
+    this.players.on('add', this._checkIfSelf);
+    this.players.on('reset', this._findSelf);
+    this.on('change:local_player_id', this._findSelf);
 
     return Backbone.Model.apply(this, arguments);
   },
@@ -207,10 +286,24 @@ var Game = Backbone.Model.extend({
     socket.emit('leave_game');
   },
 
+  getPlayer: function(id) {
+    return this.players.find(function(p) {
+      return p.id == id;
+    });
+  },
+
+  getCurrentMission: function() {
+    if (this.get('state') == G_STATE.FINISHED) {
+      return null;
+    } else {
+      return this.missions.at(this.missions.length - 1);
+    }
+  },
+
   /**
    * Called when players or missions are added to this game.
    */
-  addItem: function(item) {
+  _addItem: function(item) {
     item.game = this;
   },
 
@@ -222,6 +315,18 @@ var Game = Backbone.Model.extend({
 
   getCurrentMission: function() {
     return this.missions.last();
+  },
+
+  _findSelf: function() {
+    this.players.each(this._checkIfSelf);
+  },
+
+  _checkIfSelf: function(player) {
+
+    // todo (awyler) rethink this.get('local_player_id')
+    if (my_id == player.get('id')) {
+      this.self = player;
+    }
   }
 });
 
@@ -241,7 +346,6 @@ var ClientState = Backbone.Model.extend({
     _(this).bindAll('login', 'getAuthInfo');
     this.allGames = new GameList();
     this.game = null;
-    this.self = null;
   },
 
   login: function(info) {
@@ -269,19 +373,11 @@ var ClientState = Backbone.Model.extend({
 
   didJoinGame: function(game) {
     this.game = game;
-
-    var me = this;
-    this.game.players.on('add', function(player) {
-      if (player.get('id') === me.get('my_id')) {
-        me.self = player;
-      }
-    });
-
     this.trigger('join_game', this.game);
   },
 
   didLeaveGame: function() {
-    this.game.set(this.defaults);
+    this.game = null;
     this.trigger('leave_game');
   },
 
