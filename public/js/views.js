@@ -20,7 +20,7 @@ var CollectionView = Backbone.View.extend({
     view.render();
     if (this.collection.length <= this.options.minimumSize) {
       this._views.splice(this.collection.length - 1, 0, view);
-      this.el.insertBefore(view.el, this._views[this.collection.length].el);
+      this.$el.insertBefore(view.el, this._views[this.collection.length].el);
       var placeholder = this._views.pop();
       placeholder.remove();
     } else {
@@ -88,6 +88,33 @@ var PlayerIconView = Backbone.View.extend({
   }
 });
 
+var SelectPlayerRowView = PlayerIconView.extend({
+  tagName: 'li',
+  className: 'player_choice',
+
+  initialize: function() {
+    _(this).bindAll('render', 'updateSelection');
+    this.options.selection.on('change add remove', this.updateSelection);
+    this.render();
+    this.updateSelection();
+  },
+
+  updateSelection: function() {
+    this.$el.unbind();
+    if (this.options.selection.get(this.model.id)) {
+      this.$el
+        .addClass('selected')
+        .click(this.options.onDeSelect);
+    } else {
+      this.$el
+        .removeClass('selected')
+        .click(this.options.onSelect);
+    }
+    this.render();
+  }
+
+});
+
 var RosterView = CollectionView.extend({
   tagName: 'ul',
   className: 'roster_view',
@@ -145,6 +172,71 @@ var MissionView = Backbone.View.extend({
   className: 'mission',
 
   initialize: function() {
+    _(this).bindAll('render', 'updateSubView');
+
+    this.model.on('change', this.updateSubView);
+
+    if (this.model.isClientLeader()) {
+      this._choosePartyView = new ChoosePartyView({
+        model: this.model
+      });
+    }
+
+   this._missionSummaryView = new MissionSummaryView({
+      model: this.model
+    });
+
+    this._missionActView = new MissionActView({
+      model: this.model
+    });
+
+    this._missionVoteView = new MissionVoteView({
+      model : this.model
+    });
+  },
+
+  updateSubView : function() {
+    var state = this.model.get('state');
+    var am_leader = this.model.isClientLeader();
+
+    if (state == M_STATE.CHOOSING_MISSION && am_leader) {
+      this._subView = this._choosePartyView;
+    } else if (state == M_STATE.VOTING) {
+      this._subView = this._missionVoteView;
+    } else if (state == M_STATE.MISSIONING
+               && this.model.isClientOnMission()) {
+      this._subView = this._missionActView;
+    } else {
+      this._subView = this._missionSummaryView;
+    }
+  },
+
+  render: function() {
+    this.$el.empty();
+    this.updateSubView();
+    this._subView.render();
+    this.$el.append(this._subView.el);
+    return this;
+  }
+});
+
+var MissionActView = Backbone.View.extend({
+  render: function() {
+    this.$el.html('Mission Time');
+    return this;
+  }
+});
+
+var MissionVoteView = Backbone.View.extend({
+  render: function() {
+    this.$el.html('Voting Time');
+    return this;
+  }
+});
+
+
+var MissionSummaryView = Backbone.View.extend({
+  initialize: function() {
     _(this).bindAll('render');
 
     this._leaderView = new PlayerIconView({
@@ -156,7 +248,7 @@ var MissionView = Backbone.View.extend({
       minimumSize: GameInfo.getMissionSize(this.model)
     });
 
-    this.model.on('change', this.render);
+    this.model.party.on('change add remove', this.render);
     this.model.votes.on('change add remove', this.render);
     this.model.actions.on('change add remove', this.render);
   },
@@ -187,6 +279,64 @@ var MissionView = Backbone.View.extend({
   }
 });
 
+var ChoosePartyView = Backbone.View.extend({
+  initialize: function() {
+    _(this).bindAll('updateLockInButton', 'render');
+
+    this._choiceList = new PartyChoicesList({
+      mission: this.model,
+      collection: this.model.game.players
+    });
+
+    this.model.party.on("add remove change", this.updateLockInButton);
+    this._lockInButton =
+      $('<div class="start_vote button title layer accept full center">' +
+        'Force a Vote' +
+        '</div>'
+       ).click(function() {
+         this.model.startVote()
+       }.bind(this))
+      .hide();
+  },
+
+  updateLockInButton: function() {
+    if (this.model.party.size() ==
+        MISSION_SIZE[this.model.game.players.size()][this.model.get('turn')]
+       ) {
+      this._lockInButton.show();
+    } else {
+      this._lockInButton.hide();
+    }
+  },
+
+  render: function() {
+    this.updateLockInButton();
+    this.$el.empty();
+    this.$el.append(this._choiceList.render().el);
+    this.$el.append(this._lockInButton);
+    return this;
+  }
+});
+
+var PartyChoicesList = CollectionView.extend({
+  tagName: 'ul',
+  className: 'choose_party',
+
+  createView: function(player) {
+    return new SelectPlayerRowView({
+      model : player,
+      selection : this.options.mission.party,
+      onSelect : function() {
+        this.options.mission.addToParty(player);
+      }.bind(this),
+      onDeSelect : function() {
+        this.options.mission.removeFromParty(player);
+      }.bind(this)
+    })
+  }
+
+});
+
 var MissionListView = CollectionView.extend({
   createView: function(mission) {
     return new MissionView({
@@ -215,6 +365,7 @@ var GameView = Backbone.View.extend({
     this.model.game.on('change', _(function() {
       this.$el.addClass(this.model.game.get('state'));
     }).bind(this));
+
   },
 
   startGame : function() {
@@ -223,7 +374,8 @@ var GameView = Backbone.View.extend({
 
   updateStartButton : function() {
     if (this.model.get('my_id') == this.model.game.get('creator')
-        && this.model.game.players.length > 0) {
+        && this.model.game.players.length > 0
+        && this.model.game.get('state') == G_STATE.FINDING_PLAYERS) {
       this.startButton.show();
     } else {
       this.startButton.hide();
@@ -243,8 +395,9 @@ var GameView = Backbone.View.extend({
 
     this.$el.html(template);
     this.$el.addClass(this.model.game.get('state'));
-    this.$el.append(this._missionListView.render().el);
     this.$el.append(this._rosterView.render().el);
+    this.$el.append($('<hr/>'));
+    this.$el.append(this._missionListView.render().el);
     this.startButton =
       $('<div id="start_game" class="button title layer accept full center">' +
         'Start Game' +

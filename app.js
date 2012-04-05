@@ -38,8 +38,6 @@ io.sockets.on(
           if (!stack) {
             stack = (new Error('Unkown Error')).stack;
           }
-          console.log(e);
-          console.log(stack)
           error(e.message);
         }
       }
@@ -171,9 +169,9 @@ io.sockets.on(
       'vote',
       function(vote) {
         user.game.vote(user, vote);
-        if (user.game.state != G_STATE.VOTING) {
+        if (user.game.getInnerState() != M_STATE.VOTING) {
           broadcastGameData('vote_complete');
-          if (game.state == G_STATE.FINISHED) {
+          if (game.finished) {
             broadcastGameData('game_complete');
           }
         }
@@ -184,9 +182,9 @@ io.sockets.on(
       'mission_act',
       function(action) {
         user.game.missionAct(user, action);
-        if (user.game.state != G_STATE.MISSIONING) {
+        if (user.game.getInnerState() != M_STATE.MISSIONING) {
           broadcastGameData('mission_complete');
-          if (game.state == G_STATE.FINISHED) {
+          if (game.finished) {
             broadcastGameData('game_complete');
           }
         }
@@ -245,7 +243,7 @@ io.sockets.on(
         lobby.players,
         function(user) {
           if (!user.disconnected &&
-              (!user.game || user.game.state == G_STATE.FINISHED)) {
+              (!user.game || user.game.finished)) {
             user.socket.emit(
               event,
               getClientGameListData()

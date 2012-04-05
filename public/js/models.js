@@ -12,6 +12,10 @@ var MISSION_SIZE = {
 var G_STATE = {
   FINDING_PLAYERS : 'finding_players',
   NOT_READY : 'not_ready',
+  FINISHED : 'finished'
+};
+
+var M_STATE = {
   CHOOSING_MISSION : 'choosing_mission',
   VOTING : 'voting',
   MISSIONING : 'missioning',
@@ -54,8 +58,9 @@ var GameInfo = {
  */
 Backbone.Model.prototype.parseCollection = function(data, collection) {
   if (data[collection]) {
-    this[collection].add(data[collection], { parse: true });
-    delete data[collection];
+    if (this[collection].add) {
+      this[collection].add(data[collection], { parse: true });
+    }
   }
 };
 
@@ -115,7 +120,8 @@ var Mission = Backbone.Model.extend({
   defaults: {
     turn: null,
     attempt: null,
-    leader: null
+    leader: null,
+    state : null
   },
 
   constructor: function() {
@@ -133,8 +139,30 @@ var Mission = Backbone.Model.extend({
     return data;
   },
 
+  // dirty hacks for now
+
+  isClientLeader: function() {
+    return this.get('leader') == my_id;
+  },
+
+  isClientOnMission: function() {
+    return this.party.get(my_id);
+  },
+
   getLeader: function() {
     return this.game.getPlayer(this.get('leader'));
+  },
+
+  addToParty: function(player) {
+    socket.emit('choose_player', player.id);
+  },
+
+  removeFromParty: function(player) {
+    socket.emit('unchoose_player', player.id);
+  },
+
+  startVote: function() {
+    socket.emit('start_vote');
   }
 });
 
@@ -175,6 +203,10 @@ var Game = Backbone.Model.extend({
     socket.emit('start_game');
   },
 
+  leaveGame: function() {
+    socket.emit('leave_game');
+  },
+
   /**
    * Called when players or missions are added to this game.
    */
@@ -186,6 +218,10 @@ var Game = Backbone.Model.extend({
     return this.players.find(function(p) {
       return p.id == id;
     });
+  },
+
+  getCurrentMission: function() {
+    return this.missions.last();
   }
 });
 
@@ -212,6 +248,7 @@ var ClientState = Backbone.Model.extend({
     if (info.status == "connected") {
       this.set('signedRequest', info.authResponse.signedRequest);
       this.set('accessToken', info.authResponse.accessToken);
+      my_id = info.authResponse.userID;
       this.set('my_id', info.authResponse.userID);
       this.trigger('login');
     }

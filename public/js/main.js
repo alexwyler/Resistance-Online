@@ -118,6 +118,9 @@ var ErrorView = Backbone.View.extend({
   }
 });
 
+// hack for now
+var my_id = 'clowntown';
+
 $(document).ready(function() {
   window.fbAsyncInit = function() {
     FB.init({

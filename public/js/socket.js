@@ -23,6 +23,10 @@ function createSocket(clientState) {
     clientState.allGames.remove(game_id);
   });
 
+  socket.on('start_vote', function(game) {
+    handleJoinGame(game);
+  });
+
   socket.on('start_game', handleJoinGame);
   socket.on('join_game', handleJoinGame);
 

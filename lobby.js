@@ -71,6 +71,12 @@ var U_STATE = {
   PLAYING : 'playing',
 };
 
+var G_STATE = {
+  FINDING_PLAYERS : 'finding_players',
+  NOT_READY : 'not_ready',
+  PLAYING : 'playing',
+  FINISHED : 'finished'
+};
 
 var NEXT_GAME_ID = 1;
 function nextGameID() {
@@ -84,5 +90,7 @@ module.exports = {
   Player : Player,
   games : games,
   players : players,
-  nextGameID : nextGameID
+  nextGameID : nextGameID,
+  U_STATE : U_STATE,
+  G_STATE : G_STATE
 };

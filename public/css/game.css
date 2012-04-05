@@ -32,6 +32,10 @@ body > button {
   }
 }
 
+.selected {
+    background-color: lightblue;
+}
+
 .navigation {
   background: #eee;
   border-bottom: 1px solid #666;
@@ -86,17 +90,17 @@ body > button {
 .title {
   font-weight: bold;
   font-size: 24px;
-  padding-top: 10px; 
+  padding-top: 10px;
 }
 
 .center {
-  position: relative;          
+  position: relative;
   margin: auto;
   text-align: center;
 }
 
 .button {
-  position: absolute; 
+  position: absolute;
   bottom: 0;
   cursor: pointer;
   border: 2px solid black;

@@ -7,13 +7,26 @@ function Mission(turn, attempt, leader) {
   this.attempt = attempt;
   this.party = {};
   this.votes = {};
-  this.mission_actions = {};
+  this.actions = {};
+  this.state = M_STATE.CHOOSING_MISSION;
 
   this.getData = function(secret_vote) {
     return {
       turn : this.turn,
       leader : this.leader.id,
-      party : _.keys(this.party),
+      party : _.map(
+        this.party,
+        function(user) {
+          return user.getData()
+        }
+      ),
+      actions : _.map(
+        this.actions,
+        function(action, uid) {
+          return {user_id : uid, mission_action: action};
+        }
+      ),
+      state : this.state,
       votes : _.map(
         this.votes,
         function(vote, uid) {
@@ -39,7 +52,7 @@ function Mission(turn, attempt, leader) {
 
 function ResistanceGame(game_id, creator) {
   lobby.Game.call(this, game_id, creator);
-  this.state = G_STATE.FINDING_PLAYERS;
+  this.state = lobby.G_STATE.FINDING_PLAYERS;
   this.missions = [];
   this.spies = [];
   this.current_votes = {};
@@ -68,6 +81,7 @@ ResistanceGame.prototype.getPublicData = function() {
     creator : this.creator.id,
     passes : this.passes,
     fails : this.fails,
+    // i have no fucking idea
     missions : _.map(
       this.missions, function(mission) {
         return mission.getData();
@@ -95,12 +109,21 @@ ResistanceGame.prototype.getKnownData = function(player_id) {
   return ret;
 }
 
+ResistanceGame.prototype.getInnerState = function() {
+  var cur_mission = this.getCurrentMission();
+  if (!cur_mission || cur_mission.state == M_STATE.finished) {
+    return this.state;
+  } else {
+    return cur_mission.state;
+  }
+}
+
 ResistanceGame.prototype.getCurrentMission = function() {
   return _.last(this.missions);
 }
 
 ResistanceGame.prototype.choosePlayerForMission = function(leader, player) {
-  this.assertState(G_STATE.CHOOSING_MISSION);
+  this.assertState(M_STATE.CHOOSING_MISSION);
   this.assertPlayerIsLeader(leader);
   this.assertPlayerInGame(player);
 
@@ -113,7 +136,7 @@ ResistanceGame.prototype.choosePlayerForMission = function(leader, player) {
 }
 
 ResistanceGame.prototype.unchoosePlayerForMission = function(leader, player) {
-  this.assertState(G_STATE.CHOOSING_MISSION);
+  this.assertState(M_STATE.CHOOSING_MISSION);
   this.assertPlayerIsLeader(leader);
   this.assertPlayerInGame(player);
 
@@ -122,17 +145,17 @@ ResistanceGame.prototype.unchoosePlayerForMission = function(leader, player) {
 }
 
 ResistanceGame.prototype.callMissionPartyToVote = function(leader) {
-  this.assertState(G_STATE.CHOOSING_MISSION);
+  this.assertState(M_STATE.CHOOSING_MISSION);
   this.assertPlayerIsLeader(leader);
   var mission = this.getCurrentMission();
-  if (mission.partySize() != mission.missionSize()) {
+  if (mission.partySize() != mission.missionSize(this)) {
     throw new Error('Mission party must be size ' + mission.missionSize());
   }
-  leader.game.state = G_STATE.VOTING;
+  this.getCurrentMission().state = M_STATE.VOTING;
 }
 
 ResistanceGame.prototype.startGame = function(creator) {
-  this.assertState(G_STATE.FINDING_PLAYERS);
+  this.assertState(lobby.G_STATE.FINDING_PLAYERS);
   this.assertPlayerIsCreator(creator);
   var num_players = _.size(this.players);
   var num_spies = NUM_SPIES[num_players];
@@ -143,11 +166,12 @@ ResistanceGame.prototype.startGame = function(creator) {
   }
   var leader_idx = Math.floor(Math.random() * num_players);
   this.missions.push(new Mission(1, 1, this.players[player_ids[leader_idx]]));
-  this.state = G_STATE.CHOOSING_MISSION;
+  this.getCurrentMission().state = M_STATE.CHOOSING_MISSION;
+  this.state = lobby.G_STATE.PLAYING;
 }
 
 ResistanceGame.prototype.vote = function(player, vote) {
-  this.assertState(G_STATE.VOTING);
+  this.assertState(M_STATE.VOTING);
   this.assertPlayerInGame(player);
   var votes =  player.game.current_votes;
   votes[player.id] = vote;
@@ -173,19 +197,20 @@ ResistanceGame.prototype.resolveVote = function() {
     if (current_mission.attempt == 5) {
       this.endGame(ROLE.SPY);
     } else {
+      current_mission.state = M_STATE.FINISHED;
       this.missions.push(
         new Mission(
           current_mission.turn, current_mission.attempt + 1,
           this.getNextLeader()));
-      this.state = G_STATE.CHOOSING_MISSION;
+      this.getCurrentMission().state = M_STATE.CHOOSING_MISSION;
     }
   } else {
-    this.state = G_STATE.MISSIONING;
+    this.getCurrentMission().state = M_STATE.MISSIONING;
   }
 }
 
 ResistanceGame.prototype.missionAct = function(player, action) {
-  this.assertState(G_STATE.MISSIONING);
+  this.assertState(M_STATE.MISSIONING);
   this.assertUserOnMission(player);
   current_actions[player.id] = action;
   if (_.size(current_actions) == mission.missionSize()) {
@@ -217,12 +242,19 @@ ResistanceGame.prototype.resolveMission = function() {
 
   var game_over = passes >= 3 || fails >= 3;
   if (!game_over) {
+    current_mission.state = M_STATE.FINISHED;
     this.missions.push(
       new Mission(current_mission.turn + 1, 1, this.getNextLeader()));
-    this.state = G_STATE.CHOOSING_MISSION;
+    this.getCurrentMission().state = M_STATE.CHOOSING_MISSION;
   } else {
     this.endGame(this.passes == 3 ? ROLE.RESISTANCE : ROLE.SPY);
   }
+}
+
+ResistanceGame.prototype.endGame = function(winner) {
+  // todo inheritance?
+  this.getCurrentMission().state = M_STATE.FINSIHSED;
+  this.game.finished = true;
 }
 
 // validation
@@ -244,7 +276,7 @@ ResistanceGame.prototype.assertPlayerOnMission = function(player) {
 }
 
 ResistanceGame.prototype.assertState = function(state) {
-  if (this.state != state) {
+  if (this.getInnerState() != state) {
     throw new Error('Game must be in state ' + state);
   }
 }
@@ -270,14 +302,12 @@ var NUM_SPIES = {
   10 : 4
 };
 
-var G_STATE = {
-  FINDING_PLAYERS : 'finding_players',
-  NOT_READY : 'not_ready',
+var M_STATE = {
   CHOOSING_MISSION : 'choosing_mission',
   VOTING : 'voting',
   MISSIONING : 'missioning',
   FINISHED : 'finished'
-};
+}
 
 var ROLE = {
   SPY : 'spy',
