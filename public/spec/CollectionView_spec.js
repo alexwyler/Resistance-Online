@@ -1,5 +1,8 @@
 describe('CollectionView', function() {
 
+  var Backbone = require('backbone');
+  var CollectionView = require('views/CollectionView').CollectionView;
+
   var DummyModel = Backbone.Model.extend({
   });
 
