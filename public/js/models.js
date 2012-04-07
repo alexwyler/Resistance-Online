@@ -132,7 +132,7 @@ var Mission = Backbone.Model.extend({
   defaults: {
     turn: null,
     attempt: null,
-    leader: null,
+    leader_id: null,
     state : null
   },
 
@@ -159,7 +159,7 @@ var Mission = Backbone.Model.extend({
   },
 
   getLeader: function() {
-    return this.game.getPlayer(this.get('leader'));
+    return this.game.getPlayer(this.get('leader_id'));
   },
 
   addToParty: function(player) {
@@ -182,7 +182,7 @@ var Mission = Backbone.Model.extend({
   },
 
   isClientLeader: function() {
-    return this.get('leader') == my_id;
+    return this.get('leader_id') == this.game.self.id;
   },
 
   /**
@@ -307,12 +307,6 @@ var Game = Backbone.Model.extend({
     item.game = this;
   },
 
-  getPlayer: function(id) {
-    return this.players.find(function(p) {
-      return p.id == id;
-    });
-  },
-
   getCurrentMission: function() {
     return this.missions.last();
   },
@@ -322,9 +316,8 @@ var Game = Backbone.Model.extend({
   },
 
   _checkIfSelf: function(player) {
-
     // todo (awyler) rethink this.get('local_player_id')
-    if (my_id == player.get('id')) {
+    if (this.get('local_player_id') == player.get('id')) {
       this.self = player;
     }
   }
