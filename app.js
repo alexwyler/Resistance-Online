@@ -3,6 +3,7 @@ var app = express.createServer();
 var io = require('socket.io').listen(app);
 var fs = require('fs');
 var _ = require('underscore');
+var modulr = require('modulr');
 var facebook = require('./facebook');
 var resistance = require('./resistance');
 var lobby = require('./lobby');
@@ -18,6 +19,28 @@ app.get(
   function(req, res) {
     res.sendfile(__dirname + '/public/html/resistance.html');
   });
+
+app.get('/js/pkg/*', function(req, res) {
+  var is_dev = (req.param('dev') !== void 0);
+  var config = {
+    minify: !is_dev,
+    paths: [ 'public/lib', 'public/js' ],
+    environment: is_dev ? 'development' : 'production'
+  };
+  modulr.build('public/js/' + req.params[0], config, function(err, builtSpec) {
+    if (err) {
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.write(err.stack);
+      res.end();
+      return;
+    }
+
+    res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    res.write(builtSpec.output);
+    res.end();
+  });
+});
 
 // events
 
