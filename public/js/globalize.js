@@ -5,5 +5,6 @@ _.extend(window,
   require('./models/Player'),
   require('./models/Game'),
   require('./models/ClientState'),
-  require('./views/CollectionView')
+  require('./views/CollectionView'),
+  require('./views/PlayerIconView')
 );
