@@ -6,5 +6,6 @@ _.extend(window,
   require('./models/Game'),
   require('./models/ClientState'),
   require('./views/CollectionView'),
-  require('./views/PlayerIconView')
+  require('./views/PlayerIconView'),
+  require('./views/FacepileView')
 );

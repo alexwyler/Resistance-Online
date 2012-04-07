@@ -44,40 +44,6 @@ var RosterView = CollectionView.extend({
   }
 });
 
-var FacepileView = CollectionView.extend({
-  className: 'facepile',
-
-  createView: function(player) {
-    return new FacepileView.ItemView({
-      model: player
-    });
-  },
-
-  createPlaceholder: function() {
-    return new FacepileView.PlaceholderView();
-  }
-}, {
-  ItemView: Backbone.View.extend({
-    tagName: 'span',
-    className: 'person',
-
-    render: function() {
-      var template = '<img src="{{profile_pic}}" />';
-      this.$el.html(Mustache.render(template, this.model.attributes));
-      return this;
-    }
-  }),
-
-  PlaceholderView: Backbone.View.extend({
-    tagName: 'span',
-    className: 'person placeholder',
-
-    render: function() {
-      return this;
-    }
-  })
-});
-
 /**
  * Renders the status part of a particular mission.
  */
