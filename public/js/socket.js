@@ -23,11 +23,9 @@ function createSocket(clientState) {
     clientState.allGames.remove(game_id);
   });
 
-  socket.on('start_vote', function(game) {
-    handleJoinGame(game);
-  });
+  socket.on('start_vote', updateGameData);
 
-  socket.on('start_game', handleJoinGame);
+  socket.on('start_game', updateGameData);
   socket.on('join_game', handleJoinGame);
 
   socket.on('choose_player', function(player_id) {
@@ -43,15 +41,25 @@ function createSocket(clientState) {
     game.missions.last().party.remove(player_id);
   });
 
-  function handleJoinGame(data) {
+  /*
+   * Updates or creates a game model from raw game data.
+   *
+   * Returns the game model.
+   */
+  function updateGameData(gameData) {
     // Ensure the game is in the collection
-    var game = clientState.allGames.get(data.id);
+    var game = clientState.allGames.get(gameData.id);
     if (!game) {
-      game = new Game(data, { parse: true });
+      game = new Game(gameData, { parse: true });
       clientState.allGames.add(game);
     } else {
-      game.set(game.parse(data));
+      game.set(game.parse(gameData));
     }
+    return game;
+  }
+
+  function handleJoinGame(gameData) {
+    var game = updateGameData(gameData);
     clientState.didJoinGame(game);
   }
 
