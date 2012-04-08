@@ -82,7 +82,7 @@ var Mission = exports.Mission = Backbone.Model.extend({
   },
 
   getPartySize: function() {
-    return MISSION_SIZE[this.game.players.length][this.get('turn')];
+    return MISSION_SIZE[this.game.players.length][this.get('turn') - 1];
   }
 
 });

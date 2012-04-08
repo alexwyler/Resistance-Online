@@ -1,7 +1,6 @@
 var _ = require('underscore')._;
 var Backbone = require('backbone');
 var Mustache = require('mustache');
-var GameInfo = require('constants').GameInfo;
 var M_STATE = require('constants').M_STATE;
 var MV_STATE = require('constants').MV_STATE;
 
@@ -151,6 +150,7 @@ var MissionSummaryView = Backbone.View.extend({
   initialize: function() {
     _(this).bindAll();
 
+    this.mission = this.model.mission;
     this.game = this.model.game;
 
     this._statusView = new MissionStatusView({ model: this.model });
@@ -160,7 +160,7 @@ var MissionSummaryView = Backbone.View.extend({
     this._peopleView = new FacepileView({
       tagName: 'span',
       collection: this.model.mission.party,
-      minimumSize: GameInfo.getMissionSize(this.model)
+      minimumSize: this.mission.getPartySize()
     });
 
     this.game.on('change', this.render);
