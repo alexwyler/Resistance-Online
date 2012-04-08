@@ -10,6 +10,8 @@ var PlayerIconView = require('./PlayerIconView').PlayerIconView;
 var FacepileView = require('./FacepileView').FacepileView;
 
 var MissionActView = Backbone.View.extend({
+  className: 'act-view',
+
   render: function() {
     this.$el.html('Mission Time');
     return this;
@@ -17,6 +19,8 @@ var MissionActView = Backbone.View.extend({
 });
 
 var MissionVoteView = Backbone.View.extend({
+  className: 'vote-view',
+
   render: function() {
     this.$el.html('Voting Time');
     return this;
@@ -105,11 +109,24 @@ var MissionStatusView = Backbone.View.extend({
   initialize: function() {
     this.mission = this.model.mission;
 
-    this.model.on('change:state', this.render, this);
+    this.model.on('change:state', this.update, this);
+
+    this.update();
+  },
+
+  update: function() {
+    if (this._playerView && this._playerView.model != this.mission.getLeader()) {
+      this._playerView.remove();
+    }
+
+    this._playerView = new PlayerIconView({
+      model: this.mission.getLeader()
+    });
   },
 
   render: function() {
     var state = this.model.get('state');
+
     if (state == MV_STATE.FUTURE) {
       this.$el.html('This mission hasn\'t happened yet.');
 
@@ -126,8 +143,8 @@ var MissionStatusView = Backbone.View.extend({
       this.$el.html('Choose people for this mission.');
 
     } else if (state == MV_STATE.WAITING_FOR_PEOPLE) {
-      this.$el.html(this.mission.getLeader().get('name') +
-        ' is choosing people for this mission.');
+      this.$el.html(this._playerView.render().el);
+      this.$el.append(' is choosing&hellip;');
 
     } else if (state == MV_STATE.VOTING) {
       this.$el.html('Vote on this mission.');
@@ -145,7 +162,7 @@ var MissionStatusView = Backbone.View.extend({
 });
 
 var MissionSummaryView = Backbone.View.extend({
-  className: 'summary',
+  className: 'summary-view',
 
   initialize: function() {
     _(this).bindAll();
@@ -198,6 +215,8 @@ var MissionSummaryView = Backbone.View.extend({
 });
 
 var ChoosePartyView = Backbone.View.extend({
+  className: 'choose-party-view',
+
   initialize: function() {
     _(this).bindAll();
     this.mission = this.model.mission;
@@ -246,47 +265,25 @@ var MissionView = exports.MissionView = Backbone.View.extend({
 
     this.model.on('change', this.refresh, this);
 
-    this._choosePartyView = new ChoosePartyView({
-      model: this.model
-    });
-
-    this._missionSummaryView = new MissionSummaryView({
-      model: this.model
-    });
-
-    this._missionActView = new MissionActView({
-      model: this.model
-    });
-
-    this._missionVoteView = new MissionVoteView({
-      model : this.model
-    });
+    this._missionSummaryView = new MissionSummaryView({ model: this.model });
+    this._choosePartyView = new ChoosePartyView({ model: this.model });
+    this._missionVoteView = new MissionVoteView({ model : this.model });
+    this._missionActView = new MissionActView({ model: this.model });
   },
 
   refresh: function() {
     this.$el.attr('class', 'mission ' + this.model.get('state'));
-    this._updateSubView();
-  },
-
-  _updateSubView: function() {
-    var state = this.model.get('state');
-
-    if (state == MV_STATE.CHOOSING_PEOPLE) {
-      this._subView = this._choosePartyView;
-    } else if (state == MV_STATE.VOTING) {
-      this._subView = this._missionVoteView;
-    } else if (state == MV_STATE.ON_MISSION) {
-      this._subView = this._missionActView;
-    } else {
-      this._subView = this._missionSummaryView;
-    }
   },
 
   render: function() {
     this.$el.empty();
     this.refresh();
-    this._subView.render();
-    this.$el.append(this._subView.el);
+    this.$el.append(this._missionSummaryView.render().el);
+    var control_area = $('<div class="controls"></div>');
+    this.$el.append(control_area);
+    control_area.append(this._choosePartyView.render().el);
+    control_area.append(this._missionVoteView.render().el);
+    control_area.append(this._missionActView.render().el);
     return this;
   }
 });
