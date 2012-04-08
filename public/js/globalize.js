@@ -1,5 +1,6 @@
 _.extend(window,
   { Backbone: require('./backbone-extensions') },
+  { Mustache: require('mustache') },
   require('./config'),
   require('./models/Mission'),
   require('./models/Player'),

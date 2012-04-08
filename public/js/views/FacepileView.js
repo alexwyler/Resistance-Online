@@ -1,4 +1,5 @@
 var Backbone = require('backbone');
+var Mustache = require('mustache');
 
 var CollectionView = require('./CollectionView').CollectionView;
 
