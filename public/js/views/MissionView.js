@@ -235,30 +235,23 @@ var MissionSummaryView = Backbone.View.extend({
 var ChoosePartyView = Backbone.View.extend({
   className: 'choose-party-view',
 
+  events: {
+    'click .button': 'startVote'
+  },
+
   initialize: function() {
-    _(this).bindAll();
     this.mission = this.model.mission;
 
-    this.selected_party = new PlayerList(this.model.game.party);
-
+    this.selected_party = new Backbone.Collection(this.model.game.party);
     this.selected_party.on('add', this.choosePlayer);
     this.selected_party.on('remove', this.unChoosePlayer);
 
     this._choiceList = new ChoosePeopleView({
       collection: this.model.game.players,
       selection: this.selected_party,
-      className: 'choose_party'
     });
 
-    this.model.mission.party.on("add remove change", this.updateLockInButton);
-    this._lockInButton =
-      $('<div class="start_vote button title layer accept full center">' +
-        'Force a Vote' +
-        '</div>'
-       ).click(function() {
-         this.model.mission.startVote()
-       }.bind(this))
-      .hide();
+    this.model.mission.party.on("add remove change", this.refresh, this);
   },
 
   choosePlayer : function(player) {
@@ -269,19 +262,25 @@ var ChoosePartyView = Backbone.View.extend({
     socket.emit('unchoose_player', player.id);
   },
 
-  updateLockInButton: function() {
+  refresh: function() {
     if (this.mission.party.size() == this.mission.getPartySize()) {
-      this._lockInButton.show();
+      this.$el.addClass('filled');
     } else {
-      this._lockInButton.hide();
+      this.$el.removeClass('filled');
+    }
+  },
+
+  startVote: function() {
+    if (this.mission.party.size() == this.mission.getPartySize()) {
+      this.model.mission.startVote();
     }
   },
 
   render: function() {
-    this.updateLockInButton();
+    this.refresh();
     this.$el.empty();
     this.$el.append(this._choiceList.render().el);
-    this.$el.append(this._lockInButton);
+    this.$el.append($('<div class="wrapper"><div class="button">Vote</div></div>'));
     return this;
   }
 });

@@ -5,6 +5,7 @@ var PlayerIconView = require('./PlayerIconView').PlayerIconView;
 
 var PlayerRowView = exports.PlayerRowView = PlayerIconView.extend({
   tagName: 'li',
+  className: 'person-tile',
 
   events: {
     'click': 'toggleSelection'
@@ -41,6 +42,7 @@ var PlayerRowView = exports.PlayerRowView = PlayerIconView.extend({
 
 var ChoosePeopleView = exports.ChoosePeopleView = CollectionView.extend({
   tagName: 'ul',
+  className: 'choose-people',
 
   createView: function(player) {
     return new PlayerRowView({

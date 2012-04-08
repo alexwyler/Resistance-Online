@@ -1,5 +1,4 @@
 var Backbone = require('backbone-extensions');
-var G_STATE = require('constants').G_STATE;
 var M_STATE = require('constants').M_STATE;
 var MV_STATE = require('constants').MV_STATE;
 var MISSION_SIZE = require('constants').MISSION_SIZE;

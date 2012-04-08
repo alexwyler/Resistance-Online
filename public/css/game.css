@@ -128,6 +128,30 @@ body > button {
   margin: 0 20px;
 }
 
+.choose-party-view {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.choose-party-view .choose-people {
+  -webkit-box-flex: 1;
+}
+
+.choose-party-view .wrapper {
+  height: 0;
+  width: 100%;
+  -webkit-transition: height 100ms linear;
+  overflow: hidden;
+}
+
+.choose-party-view.filled .wrapper {
+  height: 40px;
+}
+
+.choose-party-view .button {
+  position: static;
+}
+
 .facepile .person {
   width: 30px;
   height: 30px;
@@ -142,6 +166,30 @@ body > button {
   margin: 2px 3px;
   width: 20px;
   height: 20px;
+}
+
+.choose-people {
+  background: #273f66;
+  box-shadow: 0px 5px 5px rgba(50, 50, 50, 0.75) inset;
+  border-top: 1px solid #230a36;
+  list-style-type: none;
+  padding: 10px;
+  margin: 0;
+  overflow: scroll;
+  white-space: nowrap;
+}
+
+.choose-people .person-tile {
+  padding: 5px;
+  margin: 5px;
+  display: inline-block;
+  text-align: center;
+}
+
+.choose-people .person-tile img {
+  width: 80px;
+  height: 80px;
+  display: block;
 }
 
 .title {
