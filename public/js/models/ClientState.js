@@ -10,8 +10,8 @@ var ClientState = exports.ClientState = Backbone.Model.extend({
     signedRequest: null
   },
 
-  initialize: function() {
-    _(this).bindAll('login', 'getAuthInfo');
+  initialize: function(options) {
+    this.socket = options.socket;
     this.allGames = new GameList();
     this.game = null;
   },
@@ -20,23 +20,23 @@ var ClientState = exports.ClientState = Backbone.Model.extend({
     if (info.status == "connected") {
       this.set('signedRequest', info.authResponse.signedRequest);
       this.set('accessToken', info.authResponse.accessToken);
-      my_id = info.authResponse.userID;
       this.set('my_id', info.authResponse.userID);
+      this.socket.emit('init', { auth: this.getAuthInfo() });
       this.trigger('login');
     }
   },
 
   createGame: function() {
-    socket.emit('new_game');
+    this.socket.emit('new_game');
   },
 
   joinGame: function(id) {
-    socket.emit('join_game', id);
+    this.socket.emit('join_game', id);
   },
 
   leaveGame: function() {
     this.game = null;
-    socket.emit('leave_game');
+    this.socket.emit('leave_game');
   },
 
   didJoinGame: function(game) {
@@ -56,4 +56,5 @@ var ClientState = exports.ClientState = Backbone.Model.extend({
       signedRequest: this.get('signedRequest')
     };
   }
+
 });

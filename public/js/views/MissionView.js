@@ -261,8 +261,7 @@ var ChoosePartyView = Backbone.View.extend({
     this.mission = this.model.mission;
 
     this.selected_party = new Backbone.Collection(this.mission.party.models);
-    this.selected_party.on('add', this.choosePlayer);
-    this.selected_party.on('remove', this.unChoosePlayer);
+    this.selected_party.on('add remove', this.togglePlayer, this);
 
     this._choiceList = new ChoosePeopleView({
       collection: this.model.game.players,
@@ -272,12 +271,12 @@ var ChoosePartyView = Backbone.View.extend({
     this.model.mission.party.on("add remove change", this.refresh, this);
   },
 
-  choosePlayer : function(player) {
-    socket.emit('choose_player', player.id);
-  },
-
-  unChoosePlayer : function(player) {
-    socket.emit('unchoose_player', player.id);
+  togglePlayer: function(player) {
+    if (this.mission.party.get(player.id)) {
+      this.mission.removeFromParty(player);
+    } else {
+      this.mission.addToParty(player);
+    }
   },
 
   refresh: function() {

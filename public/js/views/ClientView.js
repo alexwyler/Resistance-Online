@@ -1,4 +1,5 @@
 var Backbone = require('backbone');
+var _ = require('underscore')._;
 var LoginView = require('./LoginView').LoginView;
 var LobbyView = require('./LobbyView').LobbyView;
 var GameView = require('./GameView').GameView;

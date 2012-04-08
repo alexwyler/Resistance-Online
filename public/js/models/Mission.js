@@ -62,23 +62,23 @@ var Mission = exports.Mission = Backbone.Model.extend({
   },
 
   addToParty: function(player) {
-    socket.emit('choose_player', player.id);
+    this.game.getClientState().socket.emit('choose_player', player.id);
   },
 
   removeFromParty: function(player) {
-    socket.emit('unchoose_player', player.id);
+    this.game.getClientState().socket.emit('unchoose_player', player.id);
   },
 
   startVote: function() {
-    socket.emit('start_vote');
+    this.game.getClientState().socket.emit('start_vote');
   },
 
   castVote: function(vote) {
-    socket.emit('vote', vote);
+    this.game.getClientState().socket.emit('vote', vote);
   },
 
   doMissionAction: function(action) {
-    socket.emit('mission_act', action)
+    this.game.getClientState().socket.emit('mission_act', action)
   },
 
   isPassing: function() {

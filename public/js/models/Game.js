@@ -35,11 +35,11 @@ var Game = exports.Game = ClientAwareModel.extend({
   },
 
   startGame: function() {
-    socket.emit('start_game');
+    this.getClientState().socket.emit('start_game');
   },
 
   leaveGame: function() {
-    socket.emit('leave_game');
+    this.getClientState().socket.emit('leave_game');
   },
 
   getCurrentMission: function() {

@@ -1,4 +1,5 @@
 var Backbone = require('backbone');
+var Mustache = require('mustache');
 
 exports.ErrorView = Backbone.View.extend({
   render: function() {

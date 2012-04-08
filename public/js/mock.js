@@ -10,7 +10,7 @@ var Vote = require('models/Mission').Vote;
 var GameView = require('views/GameView').GameView;
 
 $(document).ready(function() {
-  socket = {
+  var socket = {
     emit: function(event, data) {
       this[event] && this[event].call(this, data);
     },
@@ -36,10 +36,11 @@ $(document).ready(function() {
     }
   };
 
-  _(socket).extend(Backbone.events);
+  _(socket).extend(Backbone.Events);
 
   var clientstate = window.clientstate = new ClientState({
-    my_id: PLAYER_DB[0].id
+    my_id: PLAYER_DB[0].id,
+    socket: socket
   });
 
   var game = new Game(), mission;
