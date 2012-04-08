@@ -21,13 +21,15 @@ app.get(
   });
 
 app.get('/js/pkg/*', function(req, res) {
+  var package = 'public/js/' + req.params[0];
   var is_dev = (req.param('dev') !== void 0);
   var config = {
+    environment: is_dev ? 'development' : 'production',
+    main: package,
     minify: !is_dev,
-    paths: [ 'public/lib', 'public/js' ],
-    environment: is_dev ? 'development' : 'production'
+    paths: [ 'public/lib', 'public/js' ]
   };
-  modulr.build('public/js/' + req.params[0], config, function(err, builtSpec) {
+  modulr.build(package, config, function(err, builtSpec) {
     if (err) {
       res.statusCode = 500;
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');

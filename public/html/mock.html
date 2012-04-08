@@ -9,17 +9,7 @@
   <script type="text/javascript" src="/public/lib/mustache.js"></script>
   <script type="text/javascript" src="/js/pkg/globalize.js?dev"></script>
   <script type="text/javascript" src="/public/js/views.js"></script>
-  <script type="text/javascript" src="/js/pkg/mock.js"></script>
-  <script type="text/javascript">
-  $(document).ready(function() {
-    Mock();
-    var app = new GameView({
-      model: clientstate,
-      el: $('<div class="viewport"></div>')
-    });
-    $('body').append(app.render().el);
-  });
-  </script>
+  <script type="text/javascript" src="/js/pkg/mock.js?dev"></script>
 </head>
 <body>
   <button onclick="mock_next(); return false;">Next step</button>

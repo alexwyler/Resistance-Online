@@ -1,5 +1,6 @@
-window.Mock = Mock;
-function Mock() {
+var PLAYER_DB = require('mock/database').PLAYER_DB;
+
+$(document).ready(function() {
   socket = {
     emit: function(event, data) {
       this[event] && this[event].call(this, data);
@@ -15,16 +16,24 @@ function Mock() {
   var game = new Game(), mission;
 
   clientstate.didJoinGame(game);
-  game.players.add(Mock.PLAYER_DB, { parse: true });
-  mission = new Mission({
-    turn: 1,
-    attempt: 1,
-    leader: 1341660327
-  }, { parse: true });
-  game.missions.add(mission);
-  game.set('state', G_STATE.CHOOSING_MISSION);
+  game.players.add(PLAYER_DB, { parse: true });
+
+  var app = new GameView({
+    model: clientstate,
+    el: $('<div class="viewport"></div>')
+  });
+  $('body').append(app.render().el);
 
   var mock_steps = [
+    function() {
+      mission = new Mission({
+        turn: 1,
+        attempt: 1,
+        leader: 1341660327
+      }, { parse: true });
+      game.missions.add(mission);
+      game.set('state', G_STATE.CHOOSING_MISSION);
+    },
     function() {
       // Leader has chosen the mission
       mission.people.add(game.players.get(1341660327));
@@ -57,6 +66,4 @@ function Mock() {
     var func = mock_steps.shift();
     func();
   };
-}
-
-Mock.PLAYER_DB = require('mock/database').PLAYER_DB;
+});
