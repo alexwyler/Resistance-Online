@@ -1,7 +1,9 @@
+var path = require('path');
+var fs = require('fs');
+
 var express = require('express');
 var app = express.createServer();
 var io = require('socket.io').listen(app);
-var fs = require('fs');
 var _ = require('underscore');
 var modulr = require('modulr');
 var facebook = require('./facebook');
