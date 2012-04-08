@@ -1,6 +1,7 @@
 var Backbone = require('backbone');
 var _ = require('underscore')._;
 var G_STATE = require('constants').G_STATE;
+var M_STATE = require('constants').M_STATE;
 var PLAYER_DB = require('mock/database').PLAYER_DB;
 
 var ClientState = require('models/ClientState').ClientState;
@@ -37,15 +38,17 @@ $(document).ready(function() {
       mission = new Mission({
         turn: 1,
         attempt: 1,
-        leader_id: PLAYER_DB[1].id
+        leader_id: PLAYER_DB[1].id,
+        state: M_STATE.CHOOSING_MISSION
       }, { parse: true });
       game.missions.add(mission);
       game.set('state', G_STATE.CHOOSING_MISSION);
     },
     function() {
       // Leader has chosen the mission
-      mission.people.add(game.players.get(1341660327));
-      mission.people.add(game.players.get(1599450468));
+      mission.party.add(game.players.get(1341660327));
+      mission.party.add(game.players.get(1599450468));
+      mission.set('state', M_STATE.VOTING);
       game.set('state', G_STATE.VOTING);
     },
     function() {

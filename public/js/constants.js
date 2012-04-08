@@ -22,7 +22,8 @@ var M_STATE = exports.M_STATE = {
   FINISHED : 'finished'
 };
 
-var MISSION_STATES = exports.MISSION_STATES = {
+var MV_STATE = exports.MV_STATE = {
+  UNKNOWN: 'unknown',
   FUTURE: 'future',
   WAITING_FOR_PEOPLE: 'waiting-for-people',
   CHOOSING_PEOPLE: 'choosing-people',
