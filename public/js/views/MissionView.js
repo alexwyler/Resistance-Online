@@ -47,7 +47,7 @@ var MissionViewData = Backbone.Model.extend({
    */
   _updateState: function() {
     var state = this.mission.get('state');
-    var local_player = this.game.self;
+    var local_player = this.game.getSelf();
     var new_state = MV_STATE.UNKNOWN;
 
     // Is this a future mission?

@@ -15,10 +15,10 @@ var ClientAwareModel = exports.ClientAwareModel = Backbone.Model.extend({
   // utility methods delegated to clientState
 
   isSelf : function(player_id) {
-    return player_id == this.getSelf();
+    return player_id == this.getClientID();
   },
 
-  getSelf : function() {
+  getClientID : function() {
     return this.clientState.get('my_id');
   },
 

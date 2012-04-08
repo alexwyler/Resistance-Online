@@ -4,7 +4,10 @@ function createSocket(clientState) {
   socket.on('init', function(obj) {
     if (obj.user == null) {
       clientState.trigger('error', { msg: "Login Failed" });
-    } else if (obj.game) {
+      return;
+    }
+
+    if (obj.game) {
       handleJoinGame(obj.game);
     } else {
       clientState.allGames.add(obj.game_list, { parse: true });
@@ -55,6 +58,7 @@ function createSocket(clientState) {
     } else {
       game.set(game.parse(gameData));
     }
+    game.setClientState(clientState);
     return game;
   }
 

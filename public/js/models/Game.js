@@ -50,6 +50,13 @@ var Game = exports.Game = ClientAwareModel.extend({
     }
   },
 
+  // todo: instead of the canonical player object references living in
+  // game, move them to an external map.  A game should have ids that can be
+  // exchanged for real player models.
+  getSelf: function() {
+    return this.players.get(this.getClientID());
+  },
+
   /**
    * Called when players or missions are added to this game.
    */

@@ -41,7 +41,6 @@ var ClientState = exports.ClientState = Backbone.Model.extend({
 
   didJoinGame: function(game) {
     this.game = game;
-    this.game.set('local_player_id', this.get('my_id'));
     this.trigger('join_game', this.game);
   },
 
