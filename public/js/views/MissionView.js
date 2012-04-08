@@ -214,7 +214,7 @@ var ChoosePartyView = Backbone.View.extend({
         'Force a Vote' +
         '</div>'
        ).click(function() {
-         this.model.startVote()
+         this.model.mission.startVote()
        }.bind(this))
       .hide();
   },
