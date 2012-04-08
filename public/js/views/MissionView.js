@@ -242,7 +242,7 @@ var ChoosePartyView = Backbone.View.extend({
   initialize: function() {
     this.mission = this.model.mission;
 
-    this.selected_party = new Backbone.Collection(this.model.game.party);
+    this.selected_party = new Backbone.Collection(this.mission.party.models);
     this.selected_party.on('add', this.choosePlayer);
     this.selected_party.on('remove', this.unChoosePlayer);
 
