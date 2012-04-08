@@ -266,7 +266,7 @@ ResistanceGame.prototype.resolveMission = function() {
 ResistanceGame.prototype.endGame = function(winner) {
   // todo inheritance?
   this.getCurrentMission().state = M_STATE.FINSIHSED;
-  this.game.finished = true;
+  this.finished = true;
 }
 
 // validation
