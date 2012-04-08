@@ -1,7 +1,9 @@
+var path = require('path');
+var fs = require('fs');
+
 var express = require('express');
 var app = express.createServer();
 var io = require('socket.io').listen(app);
-var fs = require('fs');
 var _ = require('underscore');
 var modulr = require('modulr');
 var facebook = require('./facebook');
@@ -21,7 +23,8 @@ app.get(
   });
 
 app.get('/js/pkg/*', function(req, res) {
-  var package = 'public/js/' + req.params[0];
+  var package = path.relative(__dirname,
+    path.resolve('public/js/' + req.params[0]));
   var is_dev = (req.param('dev') !== void 0);
   var config = {
     environment: is_dev ? 'development' : 'production',
