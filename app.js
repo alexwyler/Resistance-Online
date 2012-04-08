@@ -206,9 +206,9 @@ io.sockets.on(
       'vote',
       function(vote) {
         user.game.vote(user, vote);
-        if (user.game.getInnerState() != M_STATE.VOTING) {
+        if (user.game.getInnerState() != resistance.M_STATE.VOTING) {
           broadcastGameData('vote_complete');
-          if (game.finished) {
+          if (user.game.finished) {
             broadcastGameData('game_complete');
           }
         }
@@ -219,7 +219,7 @@ io.sockets.on(
       'mission_act',
       function(action) {
         user.game.missionAct(user, action);
-        if (user.game.getInnerState() != M_STATE.MISSIONING) {
+        if (user.game.getInnerState() != resistance.M_STATE.MISSIONING) {
           broadcastGameData('mission_complete');
           if (game.finished) {
             broadcastGameData('game_complete');

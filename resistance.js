@@ -329,5 +329,6 @@ var ACTION = {
 
 module.exports = {
   Mission : Mission,
-  ResistanceGame : ResistanceGame
+  ResistanceGame : ResistanceGame,
+  M_STATE : M_STATE
 }

@@ -26,4 +26,6 @@ function test() {
   socket.emit('new_game');
   socket.emit('start_game');
   socket.emit('choose_player', 1599450468);
+  socket.emit('start_vote');
+  socket.emit('vote', 'yes');
 }
