@@ -1,4 +1,5 @@
 var Backbone = require('backbone');
+var _ = require('underscore')._;
 
 /**
  * Extend Backbone.Model to be able to parse collections separately from normal

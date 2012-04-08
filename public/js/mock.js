@@ -1,3 +1,4 @@
+var _ = require('underscore')._;
 var PLAYER_DB = require('mock/database').PLAYER_DB;
 
 $(document).ready(function() {

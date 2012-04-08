@@ -1,3 +1,4 @@
+var _ = require('underscore')._;
 var Backbone = require('backbone');
 
 var CollectionView = exports.CollectionView = Backbone.View.extend({

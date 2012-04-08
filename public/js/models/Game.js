@@ -1,3 +1,4 @@
+var _ = require('underscore')._;
 var Backbone = require('backbone-extensions');
 
 var PlayerList = require('./Player').PlayerList;

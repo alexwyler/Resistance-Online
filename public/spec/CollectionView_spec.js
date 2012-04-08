@@ -1,5 +1,6 @@
 describe('CollectionView', function() {
 
+  var _ = require('underscore')._;
   var Backbone = require('backbone');
   var CollectionView = require('views/CollectionView').CollectionView;
 

@@ -1,6 +1,9 @@
+var _ = require('underscore')._;
+
 _.extend(window,
   { Backbone: require('./backbone-extensions') },
   { Mustache: require('mustache') },
+  { _: _ },
   require('./config'),
   require('./models/Mission'),
   require('./models/Player'),
