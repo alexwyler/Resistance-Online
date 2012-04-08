@@ -23,8 +23,8 @@ var MissionAction = exports.MissionAction = Backbone.Model.extend({
   }
 });
 
-var MissionActionList = exports.MissionActionList = Backbone.Model.extend({
-  model: Mission
+var MissionActionList = exports.MissionActionList = Backbone.Collection.extend({
+  model: MissionAction
 });
 
 var Mission = exports.Mission = Backbone.Model.extend({
@@ -46,6 +46,7 @@ var Mission = exports.Mission = Backbone.Model.extend({
   parse: function(data) {
     this.parseCollection(data, 'party');
     this.parseCollection(data, 'votes');
+    this.parseCollection(data, 'actions');
     return data;
   },
 

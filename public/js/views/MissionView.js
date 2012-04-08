@@ -91,7 +91,7 @@ var MissionViewData = Backbone.Model.extend({
 
     // Is this a future mission?
     if (state == M_STATE.FINISHED &&
-        this.model.votes.length == 0) {
+        this.mission.votes.length == 0) {
       new_state = MV_STATE.FUTURE;
 
     // Is this a previous, skipped mission?
@@ -101,7 +101,7 @@ var MissionViewData = Backbone.Model.extend({
 
     // Is this a previous, passed mission?
     } else if (state == M_STATE.FINISHED &&
-               this.model.isPassing()) {
+               this.mission.isPassing()) {
       new_state = MV_STATE.PASSED;
 
     // Is this a previous, failed mission?
