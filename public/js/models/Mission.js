@@ -74,6 +74,10 @@ var Mission = exports.Mission = Backbone.Model.extend({
     socket.emit('start_vote');
   },
 
+  castVote: function(vote) {
+    socket.emit('vote', vote);
+  },
+
   isPassing: function() {
     // XXX(rpatterson): handle the special 4th mission
     return this.actions.all(function(action) {
@@ -82,7 +86,7 @@ var Mission = exports.Mission = Backbone.Model.extend({
   },
 
   getPartySize: function() {
-    return MISSION_SIZE[this.game.players.length][this.get('turn')];
+    return MISSION_SIZE[this.game.players.length][this.get('turn') - 1];
   }
 
 });

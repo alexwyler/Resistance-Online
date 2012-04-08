@@ -56,12 +56,3 @@ var ACTION = exports.ACTION = {
   PASS : 'pass',
   FAIL : 'fail'
 }
-
-var GameInfo = exports.GameInfo = {
-  getMissionSize: function(mission) {
-    var game_size = mission.game.players.length;
-    var mission_number = mission.get('turn');
-    return MISSION_SIZE[game_size][mission_number - 1];
-  }
-};
-
