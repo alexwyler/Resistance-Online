@@ -1,34 +1,8 @@
 var Backbone = require('backbone');
 
+var ChoosePeopleView = require('./ChoosePeopleView').ChoosePeopleView;
 var CollectionView = require('./CollectionView').CollectionView;
 var PlayerIconView = require('./PlayerIconView').PlayerIconView;
-
-var SelectPlayerRowView = PlayerIconView.extend({
-  tagName: 'li',
-  className: 'player_choice',
-
-  initialize: function() {
-    _(this).bindAll('render', 'updateSelection');
-    this.options.selection.on('change add remove', this.updateSelection);
-    this.render();
-    this.updateSelection();
-  },
-
-  updateSelection: function() {
-    this.$el.unbind();
-    if (this.options.selection.get(this.model.id)) {
-      this.$el
-        .addClass('selected')
-        .click(this.options.onDeSelect);
-    } else {
-      this.$el
-        .removeClass('selected')
-        .click(this.options.onSelect);
-    }
-    this.render();
-  }
-
-});
 
 var MissionActView = Backbone.View.extend({
   render: function() {
@@ -148,9 +122,10 @@ var ChoosePartyView = Backbone.View.extend({
   initialize: function() {
     _(this).bindAll();
 
-    this._choiceList = new PartyChoicesList({
-      mission: this.model,
-      collection: this.model.game.players
+    this._choiceList = new ChoosePeopleView({
+      collection: this.model.game.players,
+      selection: this.model.party,
+      className: 'choose_party'
     });
 
     this.model.party.on("add remove change", this.updateLockInButton);
@@ -181,25 +156,6 @@ var ChoosePartyView = Backbone.View.extend({
     this.$el.append(this._lockInButton);
     return this;
   }
-});
-
-var PartyChoicesList = CollectionView.extend({
-  tagName: 'ul',
-  className: 'choose_party',
-
-  createView: function(player) {
-    return new SelectPlayerRowView({
-      model : player,
-      selection : this.options.mission.party,
-      onSelect : function() {
-        this.options.mission.addToParty(player);
-      }.bind(this),
-      onDeSelect : function() {
-        this.options.mission.removeFromParty(player);
-      }.bind(this)
-    })
-  }
-
 });
 
 var MissionView = exports.MissionView = Backbone.View.extend({
