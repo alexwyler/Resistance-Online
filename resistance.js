@@ -149,7 +149,7 @@ ResistanceGame.prototype.callMissionPartyToVote = function(leader) {
   this.assertPlayerIsLeader(leader);
   var mission = this.getCurrentMission();
   if (mission.partySize() != mission.missionSize(this)) {
-    throw new Error('Mission party must be size ' + mission.missionSize());
+    throw new Error('Mission party must be size ' + mission.missionSize(this));
   }
   this.getCurrentMission().state = M_STATE.VOTING;
 }

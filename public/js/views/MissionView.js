@@ -239,9 +239,14 @@ var ChoosePartyView = Backbone.View.extend({
     _(this).bindAll();
     this.mission = this.model.mission;
 
+    this.selected_party = new PlayerList(this.model.game.party);
+
+    this.selected_party.on('add', this.choosePlayer);
+    this.selected_party.on('remove', this.unChoosePlayer);
+
     this._choiceList = new ChoosePeopleView({
       collection: this.model.game.players,
-      selection: this.model.mission.party,
+      selection: this.selected_party,
       className: 'choose_party'
     });
 
@@ -254,6 +259,14 @@ var ChoosePartyView = Backbone.View.extend({
          this.model.mission.startVote()
        }.bind(this))
       .hide();
+  },
+
+  choosePlayer : function(player) {
+    socket.emit('choose_player', player.id);
+  },
+
+  unChoosePlayer : function(player) {
+    socket.emit('unchoose_player', player.id);
   },
 
   updateLockInButton: function() {
