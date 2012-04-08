@@ -167,9 +167,9 @@ io.sockets.on(
         user.assertNotInActiveGame();
         var new_game = new resistance.ResistanceGame(lobby.nextGameID(), user);
         lobby.games[new_game.id] = new_game;
-        broadcastGameList('new_game');
         new_game.addPlayer(user);
         socket.emit('join_game', new_game.getKnownData(user.id));
+        broadcastGameList('new_game');
       });
 
     socket.on(
