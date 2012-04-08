@@ -34,40 +34,44 @@ var CollectionView = exports.CollectionView = Backbone.View.extend({
       return child.model === item;
     })[0];
     this._views = _(this._views).without(viewToRemove);
-    viewToRemove.$el.remove();
+    viewToRemove.remove();
     this._currentSize--;
-    if (this._currentSize < this.options.minimumSize) {
-      var placeholder = this.createPlaceholder();
-      this._views.push(placeholder);
-      placeholder.render();
-      this.$el.append(placeholder.el);
-    }
+    this.ensurePlaceholders();
   },
 
   resetItems: function() {
-    _(this._views).each(function(view) {
-      view.remove();
-    });
+    _(this._views).invoke('remove');
     this._views = [];
     this._currentSize = 0;
-
-    if (this.options.minimumSize > 0) {
-      for (var i = 0; i < this.options.minimumSize; i++) {
-        this._views.push(this.createPlaceholder());
-      }
-    }
     this.render();
 
     this.collection.each(this.addItem);
   },
 
   render: function() {
-    var me = this;
-    _(this._views).each(function(child) {
-      child.render();
-      me.$el.append(child.el);
-    });
+    this.$el.empty();
+    this.ensurePlaceholders();
+    _(this._views).invoke('render');
+    this.$el.append(_(this._views).pluck('el'));
     return this;
+  },
+
+  remove: function() {
+    Backbone.View.prototype.remove.call(this);
+    _(this._views).invoke('remove');
+    this._views = [];
+    this._currentSize = 0;
+  },
+
+  ensurePlaceholders: function() {
+    if (this.options.minimumSize > 0) {
+      for (var i = this._views.length; i < this.options.minimumSize; i++) {
+        var placeholder = this.createPlaceholder();
+        this._views.push(placeholder);
+        placeholder.render();
+        this.$el.append(placeholder.el);
+      }
+    }
   },
 
   createView: function(model) {

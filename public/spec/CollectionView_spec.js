@@ -11,6 +11,10 @@ describe('CollectionView', function() {
   });
 
   var DummyView = Backbone.View.extend({
+    initialize: function() {
+      spyOn(this, 'remove').andCallThrough();
+    },
+
     render: function() {
       this.$el.html(this.model.cid);
     }
@@ -118,6 +122,7 @@ describe('CollectionView', function() {
         collection: this.collection
       });
       $('body').append(this.view.render().el);
+      this.childViews = _.clone(this.view._views);
     });
     afterEach(function() {
       this.view.remove();
@@ -125,6 +130,28 @@ describe('CollectionView', function() {
 
     then('2 items should be displayed', function() {
       expect(this.view.$('*').length).toBe(2);
+    });
+
+    when('1 item is removed from the end', function() {
+      beforeEach(function() {
+        this.collection.remove(this.collection.at(1));
+      });
+
+      then('the 2nd child view should be removed', function() {
+        expect(this.childViews[1].remove).toHaveBeenCalled();
+      });
+    });
+
+    when('it is removed', function() {
+      beforeEach(function() {
+        this.view.remove();
+      });
+
+      then('the child views should be removed', function() {
+        _.each(this.childViews, function(v) {
+          expect(v.remove).toHaveBeenCalled();
+        });
+      });
     });
   });
 
