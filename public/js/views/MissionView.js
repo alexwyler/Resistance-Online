@@ -238,7 +238,8 @@ var MissionSummaryView = Backbone.View.extend({
     this.$el.html(Mustache.render(template, {
       attempt: this.model.get('attempt'),
       up_votes: up_votes,
-      down_votes: this.model.mission.votes.length - up_votes
+      down_votes: this.model.mission.votes.length - up_votes,
+      attempt: this.mission.get('attempt')
     }));
     this.$el.prepend(this._statusView.render().el);
     this.$('div.leader').append(this._leaderView.render().el);

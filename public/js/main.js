@@ -63,6 +63,8 @@ $(document).ready(function() {
       clientState.game.players.get(player_id));
   });
 
+  socket.on('mission_complete', updateGameData);
+
   socket.on('unchoose_player', function(player_id) {
     clientState.game.missions.last().party.remove(player_id);
   });
@@ -103,3 +105,14 @@ $(document).ready(function() {
     clientState.game.players.reset(game.players);
   });
 });
+
+function test() {
+  var socket = window._debugModel.socket;
+  socket.emit('leave_game');
+  socket.emit('new_game');
+  socket.emit('start_game');
+  socket.emit('choose_player', 1599450468);
+  socket.emit('start_vote');
+  socket.emit('vote', 'yes');
+  socket.emit('act', 'pass');
+}

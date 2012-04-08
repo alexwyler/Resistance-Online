@@ -225,7 +225,7 @@ io.sockets.on(
         user.game.missionAct(user, action);
         if (user.game.getInnerState() != resistance.M_STATE.MISSIONING) {
           broadcastGameData('mission_complete');
-          if (game.finished) {
+          if (user.game.finished) {
             broadcastGameData('game_complete');
           }
         }

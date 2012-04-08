@@ -20,6 +20,7 @@ function Mission(turn, attempt, leader) {
     return {
       id : this.id,
       turn : this.turn,
+      attempt : this.attempt,
       leader_id : this.leader.id,
       party : _.map(
         this.party,
@@ -215,22 +216,23 @@ ResistanceGame.prototype.resolveVote = function() {
       this.getCurrentMission().state = M_STATE.CHOOSING_MISSION;
     }
   } else {
+    this.current_actions = {};
     this.getCurrentMission().state = M_STATE.MISSIONING;
   }
 }
 
 ResistanceGame.prototype.missionAct = function(player, action) {
   this.assertState(M_STATE.MISSIONING);
-  this.assertUserOnMission(player);
-  current_actions[player.id] = action;
-  if (_.size(current_actions) == mission.missionSize()) {
+  this.assertPlayerOnMission(player);
+  var mission = this.getCurrentMission();
+  this.current_actions[player.id] = action;
+  if (_.size(this.current_actions) == mission.missionSize(this)) {
     this.resolveMission(player.game);
   }
 }
 
 ResistanceGame.prototype.resolveMission = function() {
   var actions = this.current_actions;
-  this.current_actions = {};
   var current_mission = this.getCurrentMission();
   current_mission.mission_actions = actions;
   var fails = 0;
@@ -250,7 +252,7 @@ ResistanceGame.prototype.resolveMission = function() {
     this.fails += 1;
   }
 
-  var game_over = passes >= 3 || fails >= 3;
+  var game_over = this.passes >= 3 || this.fails >= 3;
   if (!game_over) {
     current_mission.state = M_STATE.FINISHED;
     this.missions.push(
