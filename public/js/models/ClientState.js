@@ -2,6 +2,16 @@ var _ = require('underscore')._;
 var Backbone = require('backbone');
 var GameList = require('./Game').GameList;
 
+function getUrlVars() {
+  var ret = {};
+  var params = window.location.search.substr(1).split('&');
+  for(var i = 0; i < params.length; i++) {
+    var param = params[i].split('=');
+    ret[unescape(param[0])] = unescape(param[1]);
+  }
+  return ret;
+}
+
 var ClientState = exports.ClientState = Backbone.Model.extend({
   defaults: {
     my_id: null,
@@ -21,7 +31,15 @@ var ClientState = exports.ClientState = Backbone.Model.extend({
       this.set('signedRequest', info.authResponse.signedRequest);
       this.set('accessToken', info.authResponse.accessToken);
       this.set('my_id', info.authResponse.userID);
-      this.socket.emit('init', { auth: this.getAuthInfo() });
+
+      // Debug mode, only if the server enables it.
+      var query = getUrlVars();
+      var override_id = query.sudo;
+
+      this.socket.emit('init', {
+        auth: this.getAuthInfo(),
+        override_id: override_id
+      });
       this.trigger('login');
     }
   },

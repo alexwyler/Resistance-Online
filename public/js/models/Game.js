@@ -16,14 +16,12 @@ var Game = exports.Game = ClientAwareModel.extend({
   },
 
   constructor: function() {
-    _(this).bindAll();
-
     this.players = new PlayerList();
     this.missions = new MissionList();
     this.known_roles = false; // TODO
 
-    this.players.on('add', this._addItem);
-    this.missions.on('add', this._addItem);
+    this.players.on('add', this._addItem, this);
+    this.missions.on('add', this._addItem, this);
 
     return Backbone.Model.apply(this, arguments);
   },

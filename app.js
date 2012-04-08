@@ -87,6 +87,10 @@ io.sockets.on(
         var signed_data = facebook.parse_fbsr(data.auth.signedRequest, APP_SUCRETS);
         if (signed_data && signed_data.user_id) {
           var uid = signed_data.user_id;
+          if (process.env.DEBUG && data.override_id) {
+            uid = data.override_id;
+            socket.log.warn(signed_data.user_id + " is masquerading as " + uid);
+          }
           user = lobby.players[uid];
           if (!user) {
             user = new SocketPlayer(uid, socket);
