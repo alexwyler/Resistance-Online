@@ -4,6 +4,7 @@ var Mustache = require('mustache');
 var M_STATE = require('constants').M_STATE;
 var MV_STATE = require('constants').MV_STATE;
 var VOTE = require('constants').VOTE;
+var ACTION = require('constants').ACTION;
 
 var ChoosePeopleView = require('./ChoosePeopleView').ChoosePeopleView;
 var CollectionView = require('./CollectionView').CollectionView;
@@ -13,9 +14,26 @@ var FacepileView = require('./FacepileView').FacepileView;
 var MissionActView = Backbone.View.extend({
   className: 'act-view',
 
+  events: {
+    'click button': 'doMissionAction'
+  },
+
   render: function() {
-    this.$el.html('Mission Time');
+    var template =
+      '<button class="pass" data-action="{{pass}}">Pass</button>' +
+      '<button class="fail" data-action="{{fail}}">Fail</button>';
+
+    this.$el.html(Mustache.render(template, {
+      yes: ACTION.PASS,
+      no: ACTION.FAIL
+    }));
+
     return this;
+  },
+
+  doMissionAction: function(event) {
+    var action = event.target.dataset.vote;
+    this.model.mission.doMissionAction(action);
   }
 });
 

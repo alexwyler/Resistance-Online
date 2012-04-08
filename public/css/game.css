@@ -121,18 +121,6 @@ body > button {
   z-index: 1;
 }
 
-.vote-view {
-  display: -webkit-box;
-  -webkit-box-align: center;
-  -webkit-box-pack: center;
-}
-
-.vote-view button {
-  width: 100px;
-  height: 100px;
-  margin: 0 20px;
-}
-
 .choose-party-view {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -155,6 +143,30 @@ body > button {
 
 .choose-party-view .button {
   position: static;
+}
+
+.vote-view {
+  display: -webkit-box;
+  -webkit-box-align: center;
+  -webkit-box-pack: center;
+}
+
+.vote-view button {
+  width: 100px;
+  height: 100px;
+  margin: 0 20px;
+}
+
+.act-view {
+  display: -webkit-box;
+  -webkit-box-align: center;
+  -webkit-box-pack: center;
+}
+
+.act-view button {
+  width: 100px;
+  height: 100px;
+  margin: 0 20px;
 }
 
 .facepile .person {
