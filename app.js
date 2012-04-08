@@ -23,7 +23,7 @@ app.get(
   });
 
 app.get('/js/pkg/*', function(req, res) {
-  var package = path.resolve(__dirname, 'public/js/' + req.params[0]);
+  var package = req.params[0];
   var is_dev = (req.param('dev') !== void 0);
   var config = {
     environment: is_dev ? 'development' : 'production',
