@@ -44,6 +44,8 @@ function createSocket(clientState) {
     game.missions.last().party.remove(player_id);
   });
 
+  socket.on('update_game', updateGameData);
+
   /*
    * Updates or creates a game model from raw game data.
    *

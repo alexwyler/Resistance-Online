@@ -120,6 +120,15 @@ io.sockets.on(
       }
     );
 
+    // for debugging purposes, send back the current game
+    socket.on(
+      'update_game',
+      function() {
+        user.assertInGame();
+        socket.emit('update_game', user.game.getKnownData(user.id));
+      }
+    );
+
     socket.on(
       'unchoose_player',
       function(player_id) {
