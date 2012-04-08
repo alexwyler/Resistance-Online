@@ -7,7 +7,7 @@ var PlayerRowView = exports.PlayerRowView = PlayerIconView.extend({
   tagName: 'li',
 
   events: {
-    'click': 'click'
+    'click': 'toggleSelection'
   },
 
   initialize: function(options) {
@@ -29,11 +29,11 @@ var PlayerRowView = exports.PlayerRowView = PlayerIconView.extend({
     }
   },
 
-  click: function() {
+  toggleSelection: function() {
     if (this.selection.get(this.model.id)) {
-      this.selection.remove(this.model.id);
+      this.selection.remove(this.model);
     } else {
-      this.selection.add(this.model.id);
+      this.selection.add(this.model);
     }
   }
 

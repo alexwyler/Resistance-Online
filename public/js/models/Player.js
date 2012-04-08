@@ -16,7 +16,7 @@ var Player = exports.Player = Backbone.Model.extend({
 
   fetch: function(options) {
     var me = this;
-    if (!FB) {
+    if (!window.FB) {
       return;
     }
     FB.api('/' + this.get('id'), function(data) {
