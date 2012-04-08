@@ -1,7 +1,7 @@
 require('jasmine-extensions');
 
 // Include specs
-require('../spec/index');
+require('spec/index');
 
 var jasmineEnv = jasmine.getEnv();
 jasmineEnv.updateInterval = 1000;
