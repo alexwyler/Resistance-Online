@@ -1,5 +1,12 @@
+var Backbone = require('backbone');
 var _ = require('underscore')._;
+var G_STATE = require('constants').G_STATE;
 var PLAYER_DB = require('mock/database').PLAYER_DB;
+
+var ClientState = require('models/ClientState').ClientState;
+var Game = require('models/Game').Game;
+var Mission = require('models/Mission').Mission;
+var GameView = require('views/GameView').GameView;
 
 $(document).ready(function() {
   socket = {
@@ -11,7 +18,7 @@ $(document).ready(function() {
   _(socket).extend(Backbone.events);
 
   var clientstate = window.clientstate = new ClientState({
-    my_id: 693594821
+    my_id: PLAYER_DB[0].id
   });
 
   var game = new Game(), mission;
@@ -30,7 +37,7 @@ $(document).ready(function() {
       mission = new Mission({
         turn: 1,
         attempt: 1,
-        leader: 1341660327
+        leader_id: PLAYER_DB[1].id
       }, { parse: true });
       game.missions.add(mission);
       game.set('state', G_STATE.CHOOSING_MISSION);

@@ -46,12 +46,6 @@ var Game = exports.Game = Backbone.Model.extend({
     socket.emit('leave_game');
   },
 
-  getPlayer: function(id) {
-    return this.players.find(function(p) {
-      return p.id == id;
-    });
-  },
-
   getCurrentMission: function() {
     if (this.get('state') == G_STATE.FINISHED) {
       return null;

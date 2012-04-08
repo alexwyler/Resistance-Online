@@ -1,4 +1,6 @@
 var Backbone = require('backbone-extensions');
+var G_STATE = require('constants').G_STATE;
+var MISSION_STATES = require('constants').MISSION_STATES;
 
 var PlayerList = require('./Player').PlayerList;
 
@@ -55,7 +57,7 @@ var Mission = exports.Mission = Backbone.Model.extend({
   },
 
   getLeader: function() {
-    return this.game.getPlayer(this.get('leader_id'));
+    return this.game.players.get(this.get('leader_id'));
   },
 
   addToParty: function(player) {

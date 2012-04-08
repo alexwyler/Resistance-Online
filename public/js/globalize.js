@@ -12,5 +12,6 @@ _.extend(window,
   require('./views/CollectionView'),
   require('./views/PlayerIconView'),
   require('./views/FacepileView'),
-  require('./views/MissionView')
+  require('./views/MissionView'),
+  require('./views/GameView')
 );

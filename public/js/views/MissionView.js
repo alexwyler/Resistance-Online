@@ -1,10 +1,14 @@
 var _ = require('underscore')._;
 var Backbone = require('backbone');
 var Mustache = require('mustache');
+var GameInfo = require('constants').GameInfo;
+var M_STATE = require('constants').M_STATE;
+var MISSION_STATES = require('constants').MISSION_STATES;
 
 var ChoosePeopleView = require('./ChoosePeopleView').ChoosePeopleView;
 var CollectionView = require('./CollectionView').CollectionView;
 var PlayerIconView = require('./PlayerIconView').PlayerIconView;
+var FacepileView = require('./FacepileView').FacepileView;
 
 var MissionActView = Backbone.View.extend({
   render: function() {
