@@ -13,7 +13,7 @@ function Mission(turn, attempt, leader) {
   this.getData = function(secret_vote) {
     return {
       turn : this.turn,
-      leader : this.leader.id,
+      leader_id : this.leader.id,
       party : _.map(
         this.party,
         function(user) {
