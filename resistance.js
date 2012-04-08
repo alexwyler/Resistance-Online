@@ -2,6 +2,11 @@ var _ = require('underscore');
 var lobby = require('./lobby');
 
 function Mission(turn, attempt, leader) {
+
+  if (!leader || !turn || !attempt) {
+    throw new Error("Must instantiate mission with turn, attempt and leader");
+  }
+
   this.turn = turn;
   this.leader = leader;
   this.attempt = attempt;
@@ -69,7 +74,10 @@ ResistanceGame.prototype.getNextLeader = function() {
   var cur_leader = this.getCurrentMission().leader;
   var player_ids = _.keys(this.players);
   var idx = _.indexOf(player_ids, cur_leader.id);
-  return this.players[((idx+1) % _.size(player_ids))];
+  var num_players = _.size(player_ids);
+  var next_idx = (idx + 1) % num_players;
+  var next_id = player_ids[next_idx];
+  return this.players[next_id];
 }
 
 ResistanceGame.prototype.getPublicData = function() {
