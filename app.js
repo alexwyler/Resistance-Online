@@ -65,6 +65,7 @@ io.sockets.on(
           if (!stack) {
             stack = (new Error('Unkown Error')).stack;
           }
+          console.log(stack);
           error(e.message);
         }
       }
