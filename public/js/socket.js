@@ -27,6 +27,7 @@ function createSocket(clientState) {
   });
 
   socket.on('start_vote', updateGameData);
+  socket.on('vote_complete', updateGameData);
 
   socket.on('start_game', updateGameData);
   socket.on('join_game', handleJoinGame);
