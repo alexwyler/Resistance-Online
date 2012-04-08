@@ -23,6 +23,11 @@ body > button {
   border-radius: 6px;
   margin: 0 auto;
   overflow: scroll;
+}
+
+.game-view {
+  width: 100%;
+  height: 100%;
   display: -webkit-box;
   -webkit-box-orient: vertical;
 }

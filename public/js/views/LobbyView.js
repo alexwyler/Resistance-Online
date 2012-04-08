@@ -2,6 +2,8 @@ var Backbone = require('backbone');
 var GameListView = require('./GameListView').GameListView;
 
 exports.LobbyView = Backbone.View.extend({
+  className: 'lobby-view',
+
   events: {
     'click #new_game': 'newGame'
   },
@@ -15,12 +17,10 @@ exports.LobbyView = Backbone.View.extend({
 
   render: function() {
     this.$el.html([
-      '<div id="lobby_view" class="viewport center">',
-        '<div class="navigator center title layer">',
-          '<div class="title">Games Lobby</div>',
-        '</div>',
-        '<div id="new_game" class="button title layer accept full">New Game</div>',
+      '<div class="navigator center title layer">',
+        '<div class="title">Games Lobby</div>',
       '</div>',
+      '<div id="new_game" class="button title layer accept full">New Game</div>'
     ].join(''));
 
     this.$('.navigator').after(this.gamesList.render().el);

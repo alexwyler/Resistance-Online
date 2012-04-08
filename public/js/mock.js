@@ -49,10 +49,9 @@ $(document).ready(function() {
   game.players.add(PLAYER_DB, { parse: true });
 
   var app = new GameView({
-    model: clientstate,
-    el: $('<div class="viewport"></div>')
+    model: clientstate
   });
-  $('body').append(app.render().el);
+  $('#root').append(app.render().el);
 
   var mock_steps = [
     function() {

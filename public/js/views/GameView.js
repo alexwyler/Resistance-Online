@@ -4,6 +4,8 @@ var _ = require('underscore')._;
 var MissionListView = require('./MissionView').MissionListView;
 
 var GameView = exports.GameView = Backbone.View.extend({
+  className: 'game-view',
+
   initialize: function() {
     this._missionListView = new MissionListView({
       collection: this.model.game.missions
