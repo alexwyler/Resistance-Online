@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  background: #273f66;
 }
 
 .hide {
@@ -15,11 +16,10 @@ body > button {
   position: relative;
   height: 420px;
   width: 320px;
-  border: 10px solid #000;
+  background: #fff;
+  border: 20px solid #230a36;
   border-radius: 6px;
   margin: 0 auto;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
 }
 
 @media (max-device-width: 480px) {
@@ -33,7 +33,7 @@ body > button {
 }
 
 .selected {
-    background-color: lightblue;
+  background-color: lightblue;
 }
 
 .navigation {
@@ -41,12 +41,14 @@ body > button {
   border-bottom: 1px solid #666;
   box-shadow: 0 1px 0 0 #aaa;
   height: 60px;
+  display: -webkit-box;
+  -webkit-box-pack: center;
 }
 
 .navigation .token {
-  width: 40px;
-  height: 40px;
-  border: 1px dashed #666;
+  width: 36px;
+  height: 36px;
+  border: 2px dashed #666;
   border-radius: 20px;
   display: inline-block;
   margin: 10px 10px 5px;
