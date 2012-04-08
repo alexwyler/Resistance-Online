@@ -46,7 +46,6 @@ var Mission = exports.Mission = Backbone.Model.extend({
   parse: function(data) {
     this.parseCollection(data, 'party');
     this.parseCollection(data, 'votes');
-    this.parseCollection(data, 'actions');
     return data;
   },
 
