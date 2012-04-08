@@ -9,9 +9,11 @@ function Mission(turn, attempt, leader) {
   this.votes = {};
   this.actions = {};
   this.state = M_STATE.CHOOSING_MISSION;
+  this.id = turn * 100 + attempt;
 
   this.getData = function(secret_vote) {
     return {
+      id : this.id,
       turn : this.turn,
       leader_id : this.leader.id,
       party : _.map(
