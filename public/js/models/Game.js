@@ -3,11 +3,11 @@ var Backbone = require('backbone-extensions');
 
 var PlayerList = require('./Player').PlayerList;
 var MissionList = require('./Mission').MissionList;
+var ClientAwareModel = require('./ClientAwareModel').ClientAwareModel;
 
-var Game = exports.Game = Backbone.Model.extend({
+var Game = exports.Game = ClientAwareModel.extend({
   defaults: {
     id: null,
-    local_player_id: null,
     creator: null,
     roles: null,
     passes: null,
@@ -24,10 +24,6 @@ var Game = exports.Game = Backbone.Model.extend({
 
     this.players.on('add', this._addItem);
     this.missions.on('add', this._addItem);
-
-    this.players.on('add', this._checkIfSelf);
-    this.players.on('reset', this._findSelf);
-    this.on('change:local_player_id', this._findSelf);
 
     return Backbone.Model.apply(this, arguments);
   },
@@ -63,17 +59,6 @@ var Game = exports.Game = Backbone.Model.extend({
 
   getCurrentMission: function() {
     return this.missions.last();
-  },
-
-  _findSelf: function() {
-    this.players.each(this._checkIfSelf);
-  },
-
-  _checkIfSelf: function(player) {
-    // todo (awyler) rethink this.get('local_player_id')
-    if (this.get('local_player_id') == player.get('id')) {
-      this.self = player;
-    }
   }
 });
 
