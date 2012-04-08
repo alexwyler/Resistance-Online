@@ -74,6 +74,10 @@ var Mission = exports.Mission = Backbone.Model.extend({
     socket.emit('start_vote');
   },
 
+  castVote: function(vote) {
+    socket.emit('vote', vote);
+  },
+
   isPassing: function() {
     // XXX(rpatterson): handle the special 4th mission
     return this.actions.all(function(action) {

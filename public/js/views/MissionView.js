@@ -3,6 +3,7 @@ var Backbone = require('backbone');
 var Mustache = require('mustache');
 var M_STATE = require('constants').M_STATE;
 var MV_STATE = require('constants').MV_STATE;
+var VOTE = require('constants').VOTE;
 
 var ChoosePeopleView = require('./ChoosePeopleView').ChoosePeopleView;
 var CollectionView = require('./CollectionView').CollectionView;
@@ -21,9 +22,26 @@ var MissionActView = Backbone.View.extend({
 var MissionVoteView = Backbone.View.extend({
   className: 'vote-view',
 
+  events: {
+    'click button': 'castVote'
+  },
+
   render: function() {
-    this.$el.html('Voting Time');
+    var template =
+      '<button class="approve" data-vote="{{yes}}">Approve</button>' +
+      '<button class="reject" data-vote="{{no}}">Reject</button>';
+
+    this.$el.html(Mustache.render(template, {
+      yes: VOTE.YES,
+      no: VOTE.NO
+    }));
+
     return this;
+  },
+
+  castVote: function(event) {
+    var vote = event.target.dataset.vote;
+    this.model.mission.castVote(vote);
   }
 });
 
@@ -88,7 +106,7 @@ var MissionViewData = Backbone.Model.extend({
 
     // Are we on this mission?
     } else if (state == M_STATE.MISSIONING &&
-               this.mission.people.get(local_player.id)) {
+               this.mission.party.get(local_player.id)) {
       new_state = MV_STATE.ON_MISSION;
 
     // We must be waiting for the mission results

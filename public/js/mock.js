@@ -7,12 +7,21 @@ var PLAYER_DB = require('mock/database').PLAYER_DB;
 var ClientState = require('models/ClientState').ClientState;
 var Game = require('models/Game').Game;
 var Mission = require('models/Mission').Mission;
+var Vote = require('models/Mission').Vote;
 var GameView = require('views/GameView').GameView;
 
 $(document).ready(function() {
   socket = {
     emit: function(event, data) {
       this[event] && this[event].call(this, data);
+    },
+
+    vote: function(raw_vote) {
+      var vote = new Vote({
+        user_id: game.self.id,
+        in_favor: raw_vote == 'yes'
+      });
+      mission.votes.add(vote);
     }
   };
 
@@ -54,12 +63,16 @@ $(document).ready(function() {
     function() {
       // The votes percolate in
       _(game.players.models).each(function(player, i) {
+        if (player == game.self) {
+          return;
+        }
         var vote = new Vote({
           user_id: player.get('id'),
           in_favor: true
         });
         mission.votes.add(vote);
       });
+      mission.set('state', M_STATE.MISSIONING);
     },
     function() {
       // Mission actions
