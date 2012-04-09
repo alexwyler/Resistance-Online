@@ -12,6 +12,7 @@ var MISSION_SIZE = exports.MISSION_SIZE = {
 var G_STATE = exports.G_STATE = {
   FINDING_PLAYERS : 'finding_players',
   NOT_READY : 'not_ready',
+  PLAYING : 'playing',
   FINISHED : 'finished'
 };
 
