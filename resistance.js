@@ -293,7 +293,7 @@ ResistanceGame.prototype.assertState = function(state) {
   }
 }
 
-var MISSION_SIZE = {
+var MISSION_SIZE = exports.MISSION_SIZE = {
   1 : [1, 1, 1, 1, 1],
   2 : [2, 2, 2, 2, 2],
   5 : [2, 3, 2, 3, 3],
