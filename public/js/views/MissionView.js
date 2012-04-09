@@ -190,7 +190,6 @@ var MissionStatusView = Backbone.View.extend({
 
     } else if (state == MV_STATE.WAITING_FOR_RESULTS) {
       this.$el.html('Waiting for mission results.');
-
     }
 
     return this;
