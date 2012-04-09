@@ -7,6 +7,7 @@ var _ = require('underscore');
 var BOT_ID = 1;
 exports.newBotClient = function(strat_name) {
   var serverSocket = new MockSocket();
+  serverSocket.server = true;
   var clientSocket = new MockSocket(serverSocket);
   var player = new SocketPlayer("bot:" + ++BOT_ID, serverSocket);
   if (!strat_name) {
@@ -46,7 +47,12 @@ var BotClient = function(socket, player, strategy) {
   }
 
   this.amIOnMission = function() {
-    return _.contains(this.getCurrentMission().party, this.player);
+    return _.contains(
+      _.pluck(
+        this.getCurrentMission().party,
+        'id'
+      ),
+      this.player.id);
   }
 
   this.chooseParty = function(game) {
@@ -70,14 +76,13 @@ var BotClient = function(socket, player, strategy) {
   this.missionAct = function(game) {
     this.setGame(game);
     if (this.amIOnMission()) {
-      socket.emit('mission_act', this.Strategy.actOnMission());
+      socket.emit('mission_act', this.strategy.actOnMission());
     }
   };
 
   _(this).bindAll();
-  console.log("binding client socket " + socket.id);
+  socket.on('vote_complete', this.missionAct);
   socket.on('start_game', this.chooseParty);
   socket.on('mission_complete', this.chooseParty);
   socket.on('start_vote', this.vote);
-  socket.on('vote_complete', this.missionAct);
 };

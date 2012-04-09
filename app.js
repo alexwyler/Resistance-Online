@@ -58,6 +58,7 @@ function registerClient(socket, player) {
   var user = null;
   if (player) {
     var user = player;
+    lobby.players[player.id] = player;
   }
 
   // handle errors
@@ -72,6 +73,7 @@ function registerClient(socket, player) {
           stack = (new Error('Unkown Error')).stack;
         }
         console.log(stack);
+        console.log(data);
         error(e.message);
       }
     }
@@ -124,7 +126,6 @@ function registerClient(socket, player) {
   socket.on(
     'choose_player',
     function(player_id) {
-      console.log(player_id);
       user.assertInGame();
       user.game.choosePlayerForMission(user, lobby.players[player_id]);
       broadcastToGame(user.game, 'choose_player', player_id);
@@ -136,10 +137,10 @@ function registerClient(socket, player) {
     function() {
       user.game.assertPlayerIsCreator(user);
       var botClient = Bot.newBotClient();
-      user.game.addPlayer(botClient.player);
-      broadcastGameData('player_join', user.game, true);
       registerClient(botClient.player.socket, botClient.player);
+      user.game.addPlayer(botClient.player);
       botClient.player.socket.emit('join_game', user.game);
+      broadcastGameData('player_join', user.game, true);
     }
   );
 

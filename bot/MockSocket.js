@@ -20,16 +20,23 @@ exports.MockSocket = function(partner) {
     this.on_events[event] = callback;
   }
 
+  this.getType = function() {
+    return (this.server == undefined) ? 'client' : 'server';
+  }
+
   this.emit = function(event, data) {
     if (this.partner.on_events[event]) {
-      console.log("emit " + this.id + ": " + event + ", " + data);
+      console.log(
+        "emit " + this.id + " (" + this.getType()
+          + "): " + event + ", " + data);
       this.partner.on_events[event](data);
+    } else {
+      console.log(
+        'event type "' +
+          event +
+          '" not defined on partner socket ' +
+          this.partner.id + ' (' + this.partner.getType() + ')'
+      );
     }
-    console.log(
-      'event type "' +
-        event +
-        '" not defined on partner socket ' +
-        this.partner.id
-    );
   }
 }
