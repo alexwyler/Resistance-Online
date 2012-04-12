@@ -24,9 +24,9 @@ var PlayerRowView = exports.PlayerRowView = PlayerIconView.extend({
 
   refresh: function() {
     if (this.selection.get(this.model.id)) {
-      this.$el.addClass('selected')
+      this.$el.addClass('selected');
     } else {
-      this.$el.removeClass('selected')
+      this.$el.removeClass('selected');
     }
   },
 

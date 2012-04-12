@@ -20,8 +20,8 @@ var MissionActView = Backbone.View.extend({
 
   render: function() {
     var template =
-      '<button class="pass" data-action="{{pass}}">Pass</button>' +
-      '<button class="fail" data-action="{{fail}}">Fail</button>';
+      '<button class="large accept bottom half left" data-action="{{pass}}">Pass</button>' +
+      '<button class="large reject bottom half right" data-action="{{fail}}">Fail</button>';
 
     this.$el.html(Mustache.render(template, {
       yes: ACTION.PASS,
@@ -34,6 +34,7 @@ var MissionActView = Backbone.View.extend({
   doMissionAction: function(event) {
     var action = event.target.dataset.vote;
     this.model.mission.doMissionAction(action);
+    $('.act-view').addClass('voted');
   }
 });
 
@@ -46,8 +47,8 @@ var MissionVoteView = Backbone.View.extend({
 
   render: function() {
     var template =
-      '<button class="approve" data-vote="{{yes}}">Approve</button>' +
-      '<button class="reject" data-vote="{{no}}">Reject</button>';
+      '<button class="large accept bottom left half" data-vote="{{yes}}">Approve</button>' +
+      '<button class="large reject bottom right half" data-vote="{{no}}">Reject</button>';
 
     this.$el.html(Mustache.render(template, {
       yes: VOTE.YES,
@@ -60,6 +61,7 @@ var MissionVoteView = Backbone.View.extend({
   castVote: function(event) {
     var vote = event.target.dataset.vote;
     this.model.mission.castVote(vote);
+    $('.vote-view').addClass('voted');
   }
 });
 
@@ -254,7 +256,7 @@ var ChoosePartyView = Backbone.View.extend({
   className: 'choose-party-view',
 
   events: {
-    'click .button': 'startVote'
+    'click button': 'startVote'
   },
 
   initialize: function() {
@@ -297,7 +299,7 @@ var ChoosePartyView = Backbone.View.extend({
     this.refresh();
     this.$el.empty();
     this.$el.append(this._choiceList.render().el);
-    this.$el.append($('<div class="wrapper"><div class="button">Vote</div></div>'));
+    this.$el.append($('<button class="full large">Vote</button>'));
     return this;
   }
 });

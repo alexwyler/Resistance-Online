@@ -4,6 +4,7 @@ var ClientView = require('views/ClientView').ClientView;
 var Game = require('models/Game').Game;
 
 $(document).ready(function() {
+  setTimeout(function() { window.scrollTo(0, 1) }, 100);
   window.fbAsyncInit = function() {
     FB.init({
       appId: '326683484060385',
@@ -86,7 +87,15 @@ $(document).ready(function() {
       game.set(game.parse(gameData));
     }
     game.setClientState(clientState);
+    setTimeout(scrollToCurrent, 100);
     return game;
+  }
+
+  function scrollToCurrent() {
+    var list = $('.mission-list')[0];
+    if (list) {
+      list.scrollTop = list.scrollHeight;
+    }
   }
 
   function handleJoinGame(gameData) {

@@ -22,7 +22,7 @@ body > button {
   border: 20px solid #230a36;
   border-radius: 6px;
   margin: 0 auto;
-  overflow: scroll;
+  overflow: hidden;
 }
 
 .game-view {
@@ -66,8 +66,10 @@ body > button {
 }
 
 .mission-list {
-  display: -webkit-box;
-  -webkit-box-flex: 1;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  width: 320px;
+  height: 360px;
 }
 
 .person img {
@@ -77,6 +79,9 @@ body > button {
 }
 
 .mission {
+  width: inherit;
+  height: inherit;
+  overflow: hidden;
   line-height: 30px;
   display: -webkit-box;
   -webkit-box-flex: 1;
@@ -131,19 +136,14 @@ body > button {
   -webkit-box-flex: 1;
 }
 
-.choose-party-view .wrapper {
-  height: 0;
-  width: 100%;
-  -webkit-transition: height 100ms linear;
-  overflow: hidden;
+.choose-party-view.filled button {
+  bottom: 0px;
 }
 
-.choose-party-view.filled .wrapper {
-  height: 40px;
-}
-
-.choose-party-view .button {
-  position: static;
+.choose-party-view button {
+  -webkit-transition: bottom 100ms linear;
+  position: absolute;                   
+  bottom: -50px;
 }
 
 .vote-view {
@@ -152,22 +152,15 @@ body > button {
   -webkit-box-pack: center;
 }
 
-.vote-view button {
-  width: 100px;
-  height: 100px;
-  margin: 0 20px;
-}
-
 .act-view {
   display: -webkit-box;
   -webkit-box-align: center;
   -webkit-box-pack: center;
 }
 
-.act-view button {
-  width: 100px;
-  height: 100px;
-  margin: 0 20px;
+.voted button {
+  bottom: -50px;
+  -webkit-transition: bottom 100ms linear;
 }
 
 .facepile .person {
@@ -191,7 +184,7 @@ body > button {
   box-shadow: 0px 5px 5px rgba(50, 50, 50, 0.75) inset;
   border-top: 1px solid #230a36;
   list-style-type: none;
-  padding: 10px;
+  padding: 5px;
   margin: 0;
   overflow: scroll;
   white-space: nowrap;
@@ -222,30 +215,36 @@ body > button {
   text-align: center;
 }
 
-.button {
+.bottom {
   position: absolute;
   bottom: 0;
-  cursor: pointer;
-  border: 2px solid black;
-  border-radius: 12px;
-  margin: 9px;
+}
+
+button.full {
+  width: 300px;
+  margin: 5px 10px;
   height: 40px;
 }
 
-.button.full {
-  width: 300px;
-}
-
-.button.half {
+button.half {
   width: 130px;
-  float: left;
+  margin: 5px 10px;
+  height: 40px;
 }
 
-.button.accept {
+button.left {
+  left: 0;
+}
+
+button.right {
+  right: 0;
+}
+
+button.accept {
   background: green;
 }
 
-.button.reject {
+button.reject {
   background: red;
 }
 
@@ -253,10 +252,6 @@ body > button {
   height: 40px;
   background: red;
   z-index: 9;
-}
-
-.choosing_mission .roster_view {
-  display: none;
 }
 
 .selectable {
@@ -273,4 +268,8 @@ body > button {
 
 .large {
   font-size: 22px;
+}
+
+.float-left {
+  float: left;
 }

@@ -20,7 +20,7 @@ exports.LobbyView = Backbone.View.extend({
       '<div class="navigator center title layer">',
         '<div class="title">Games Lobby</div>',
       '</div>',
-      '<div id="new_game" class="button title layer accept full">New Game</div>'
+      '<button id="new_game" class="bottom large full center">New Game</button>'
     ].join(''));
 
     this.$('.navigator').after(this.gamesList.render().el);

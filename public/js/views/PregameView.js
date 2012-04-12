@@ -22,6 +22,7 @@ var PregameView = exports.PregameView = Backbone.View.extend({
 
   render: function() {
     this.$el.empty();
+    this.$el.append('<div class="large">Current Players:</div>');
     this.$el.append(this._playersView.render().el);
 
     if (this.model.game.getClientID()
@@ -36,9 +37,9 @@ var PregameView = exports.PregameView = Backbone.View.extend({
     } else {
       this.$el.append(
         $(
-          '<div id="start_game" class="button title layer accept full">' +
+          '<button id="start_game" class="bottom large full center">' +
             'Start Game' +
-          '</div>'
+          '</button>'
         ).click(this.clickStartGame)
       );
     }
