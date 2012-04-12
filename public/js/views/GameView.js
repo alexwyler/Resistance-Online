@@ -19,7 +19,7 @@ var GameView = exports.GameView = Backbone.View.extend({
       model: this.model
     });
 
-    this.model.game.on('state:change', this.updateSubview);
+    this.model.game.on('change', this.updateSubview);
     this.updateSubview();
   },
 

@@ -198,6 +198,7 @@ function registerClient(socket, player) {
       user.assertNotInActiveGame();
       var game = lobby.games[game_id];
       game.addPlayer(user);
+      broadcastAll('player_join', game.getPublicData());
       broadcastGameData('player_join', game, true);
       socket.emit('join_game', game.getKnownData(user.id));
     }
@@ -217,11 +218,26 @@ function registerClient(socket, player) {
       var game = user.game;
       user.game.removePlayer(user);
       socket.emit('leave_game');
-      if (_.size(game.players) > 0) {
-        broadcastGameData('player_leave', game);
-      } else {
+
+      // If the game has started, we need to do something special
+      if (game.state == lobby.G_STATE.PLAYING) {
+        // todo: replace with bot or something
+        _.each(
+          game.players,
+          function(player) {
+            player.game = null;
+          }
+        );
         delete lobby.games[game.id];
         broadcastAll('delete_game', game.id);
+      } else {
+        if (_.size(game.players) > 0) {
+          broadcastAll('player_leave', game.getPublicData());
+        } else {
+          // todo: pass creator-ship
+          delete lobby.games[game.id];
+          broadcastAll('delete_game', game.id);
+        }
       }
     }
   );
