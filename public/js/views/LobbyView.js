@@ -11,19 +11,18 @@ exports.LobbyView = Backbone.View.extend({
   initialize: function() {
     this.gamesList = new GameListView({
       collection: this.model.allGames,
-      clientState: this.model
+      clientState: this.model,
+      minimumSize: 1
     });
   },
 
   render: function() {
     this.$el.html([
-      '<div class="navigator center title layer">',
-        '<div class="title">Games Lobby</div>',
-      '</div>',
+      '<div class="center title">Games Lobby</div>',
       '<button id="new_game" class="bottom large full center">New Game</button>'
     ].join(''));
 
-    this.$('.navigator').after(this.gamesList.render().el);
+    this.$('.title').after(this.gamesList.render().el);
     return this;
   },
 
