@@ -27,8 +27,8 @@ exports.ClientView = Backbone.View.extend(
       this.$el.append('<div class="splash">'
                       + '<div class="splash_msg">'
                       + '<div class="splash_txt"></div>'
-                      + '<button class="large okay">okay</button>'
-                      + '<button class="large exit">exit</button>'
+                      + '<button class="large okay">OKAY</button>'
+                      + '<button class="large exit">EXIT</button>'
                       + '</div>'
                       + '</div>');
       return this;

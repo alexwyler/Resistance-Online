@@ -174,6 +174,11 @@ body > button {
   -webkit-box-pack: center;
 }
 
+button {
+  background-color: #E7EBF2;
+  font-weight: bold;
+}
+
 .voted button {
   bottom: -50px;
   -webkit-transition: bottom 100ms linear;
@@ -257,11 +262,13 @@ button.right {
 }
 
 button.accept {
-  background: green;
+  background: #0B2161;
+  color: white;
 }
 
 button.reject {
-  background: red;
+  background-color: #610B21;
+  color: white;
 }
 
 .error_state {
@@ -323,11 +330,14 @@ button.reject {
   padding: 20px;
 }
 
+.game_over .splash_txt {
+  padding: 0px;
+}
+
 .splash_msg button {
   margin: auto;            
   width: 200px;
   height: 50px;
-  background-color: #273F66;
 }
 
 .splash button.exit {
