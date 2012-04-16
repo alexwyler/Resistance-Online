@@ -84,7 +84,7 @@ var Mission = exports.Mission = Backbone.Model.extend({
   isPassing: function() {
     // XXX(rpatterson): handle the special 4th mission
     return this.actions.all(function(action) {
-      action.get('mission_action') == ACTION.PASS;
+      return action.get('mission_action') == 'pass';
     });
   },
 

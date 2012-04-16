@@ -64,7 +64,7 @@ function ResistanceGame(game_id, creator) {
   this.missions = [];
   this.spies = [];
   this.current_votes = {};
-  this.current_mission_actions = {};
+  this.current_actions = {};
   this.passes = 0;
   this.fails = 0;
 }
@@ -234,7 +234,7 @@ ResistanceGame.prototype.missionAct = function(player, action) {
 ResistanceGame.prototype.resolveMission = function() {
   var actions = this.current_actions;
   var current_mission = this.getCurrentMission();
-  current_mission.mission_actions = actions;
+  current_mission.actions = actions;
   var fails = 0;
   _.each(
     actions,
