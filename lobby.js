@@ -61,6 +61,12 @@ Game.prototype.assertPlayerInGame = function(player) {
   }
 }
 
+Game.prototype.assertNotStarted = function() {
+  if (this.state != G_STATE.FINDING_PLAYERS) {
+    throw new Error('Game must have not yet started');
+  }
+}
+
 Game.prototype.assertPlayerIsCreator = function(creator) {
   this.assertPlayerInGame(creator);
   if (this.creator.id != creator.id) {

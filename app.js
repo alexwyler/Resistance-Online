@@ -197,6 +197,7 @@ function registerClient(socket, player) {
     function(game_id) {
       user.assertNotInActiveGame();
       var game = lobby.games[game_id];
+      game.assertNotStarted();
       game.addPlayer(user);
       broadcastAll('player_join', game.getPublicData());
       broadcastGameData('player_join', game, true);

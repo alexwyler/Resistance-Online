@@ -107,15 +107,15 @@ $(document).ready(function() {
     if (pass) {
       showSplash("MISSION SUCCESS");
     } else {
-      showSplash("MISSION FAILED");  
+      showSplash("MISSION FAILED");
     }
   }
-  
+
   function handleGameSplash(state) {
     if (state.passes > state.fails) {
-      showSplash('THE RESISTANCE WIN');  
+      showSplash('THE RESISTANCE WIN');
     } else {
-      showSplash('THE SPIES WIN');  
+      showSplash('THE SPIES WIN');
     }
     $('.splash').addClass('game_over');
   }
