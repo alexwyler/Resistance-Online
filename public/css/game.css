@@ -65,6 +65,14 @@ body > button {
   margin: 10px 10px 5px;
 }
 
+.navigation .token.fail {
+  background-color: #610B21;
+}
+
+.navigation .token.pass {
+  background-color: #0B2161;
+}
+
 .mission-list {
   overflow-y: scroll;
   overflow-x: hidden;
@@ -150,7 +158,7 @@ body > button {
 
 .choose-party-view button {
   -webkit-transition: bottom 100ms linear;
-  position: absolute;                   
+  position: absolute;
   bottom: -50px;
 }
 

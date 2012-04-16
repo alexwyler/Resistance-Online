@@ -342,7 +342,8 @@ var MissionListView = exports.MissionListView = CollectionView.extend({
 
   createView: function(mission) {
     return new MissionView({
-      model: mission
+      model: mission,
+      id : mission.get('turn') + "_" + mission.get('attempt')
     });
   }
 })

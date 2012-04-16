@@ -4,6 +4,7 @@ var _ = require('underscore')._;
 
 var MissionListView = require('./MissionView').MissionListView;
 var PregameView = require('./PregameView').PregameView;
+var ScoreHeaderView = require('./ScoreHeaderView').ScoreHeaderView;
 
 var GameView = exports.GameView = Backbone.View.extend({
   className: 'game-view',
@@ -13,6 +14,10 @@ var GameView = exports.GameView = Backbone.View.extend({
 
     this._missionListView = new MissionListView({
       collection: this.model.game.missions
+    });
+
+    this._scoreHeaderView = new ScoreHeaderView({
+      model : this.model
     });
 
     this._pregameView = new PregameView({
@@ -33,20 +38,10 @@ var GameView = exports.GameView = Backbone.View.extend({
   },
 
   render: function() {
-    var template = [
-      '<div class="navigation">',
-        '<div data-id="1" class="token"></div>',
-        '<div data-id="2" class="token"></div>',
-        '<div data-id="3" class="token"></div>',
-        '<div data-id="4" class="token"></div>',
-        '<div data-id="5" class="token"></div>',
-      '</div>'
-    ].join('');
 
-    this.$el.html(template);
-
+    this.$el.empty();
+    this.$el.append(this._scoreHeaderView.render().el);
     this.$el.append(this._subview.render().el);
-
     return this;
   }
 });

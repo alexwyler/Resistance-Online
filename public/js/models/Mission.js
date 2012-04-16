@@ -88,6 +88,20 @@ var Mission = exports.Mission = Backbone.Model.extend({
     });
   },
 
+  votePassed: function() {
+    var passed = 0;
+    this.votes.each(
+      function(vote) {
+        console.log(vote);
+        passed += vote.get('vote') == 'yes' ? 1 : 0;
+      });
+    return passed > 0;
+  },
+
+  isFinished: function() {
+    return this.get('state') == M_STATE.FINISHED;
+  },
+
   getPartySize: function() {
     return MISSION_SIZE[this.game.players.length][this.get('turn') - 1];
   }
