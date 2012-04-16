@@ -149,13 +149,4 @@ $(document).ready(function() {
   socket.on('player_join', updateGameData);
 
   socket.on('player_leave', updateGameData);
-
 });
-
-window.test = function(){
-  var socket = window._debugModel.socket;
-  socket.emit('leave_game');
-  socket.emit('new_game');
-  socket.emit('add_bot');
-  socket.emit('start_game');
-}

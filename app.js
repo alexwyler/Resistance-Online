@@ -140,7 +140,7 @@ function registerClient(socket, player) {
       registerClient(botClient.player.socket, botClient.player);
       user.game.addPlayer(botClient.player);
       botClient.player.socket.emit('join_game', user.game);
-      broadcastGameData('player_join', user.game, {skip_sender: true});
+      broadcastGameData('player_join', user.game, true);
     }
   );
 
@@ -200,7 +200,7 @@ function registerClient(socket, player) {
       game.assertNotStarted();
       game.addPlayer(user);
       broadcastAll('player_join', game.getPublicData());
-      broadcastGameData('player_join', game, {skip_sender: true});
+      broadcastGameData('player_join', game, true);
       socket.emit('join_game', game.getKnownData(user.id));
     }
   );
@@ -251,7 +251,12 @@ function registerClient(socket, player) {
       if (user.game.getInnerState() != resistance.M_STATE.VOTING) {
         broadcastGameData('vote_complete', user.game);
         if (user.game.finished) {
-          broadcastGameData('game_complete', user.game, {send_to_all : true});
+          broadcastGameData('game_complete', user.game);
+          broadcastAll('delete_game', user.game.id, {
+            excluded: _.map(user.game.players, function(player) {
+              return player.id;
+            })
+          });
         }
       }
     }
@@ -264,7 +269,12 @@ function registerClient(socket, player) {
       if (user.game.getInnerState() != resistance.M_STATE.MISSIONING) {
         broadcastGameData('mission_complete', user.game);
         if (user.game.finished) {
-          broadcastGameData('game_complete', user.game, {send_to_all : true});
+          broadcastGameData('game_complete', user.game);
+          broadcastAll('delete_game', user.game.id, {
+            excluded: _.map(user.game.players, function(player) {
+              return player.id;
+            })
+          });
         }
       }
     }
@@ -277,16 +287,21 @@ function registerClient(socket, player) {
       });
   };
 
-  var broadcastAll = function(event, data, skip_sender) {
-    broadcast(lobby.players, event, data, skip_sender);
+  var broadcastAll = function(event, data, options) {
+    broadcast(lobby.players, event, data, options);
   };
 
-  var broadcast = function(users, event, data, skip_sender) {
+  var broadcast = function(users, event, data, options) {
+    options = options || {};
     for (uid in users) {
       var user = users[uid];
       if (!user.disconnected &&
-          (!skip_sender || socket.id != user.socket.id)) {
-        user.socket.emit(event, data);
+          (!options.skip_sender || socket.id != user.socket.id)) {
+
+        if (!options.excluded
+            || !_.contains(options.excluded, uid)) {
+          user.socket.emit(event, data);
+        }
       }
     }
   };
@@ -295,18 +310,15 @@ function registerClient(socket, player) {
     broadcast(game.players, event, data, skip_sender);
   }
 
-  var broadcastGameData = function(event, game, options) {
+  var broadcastGameData = function(event, game, skip_sender) {
     if (!game) {
       game = user.game;
     }
-    options = options || {};
-    var users_to_send = options.send_to_all ? lobby.players : game.players;
-
     _.each(
-      users_to_send,
+      game.players,
       function(user) {
         if (!user.disconnected &&
-            (!options.skip_sender || socket.id != user.socket.id)) {
+            (!skip_sender || socket.id != user.socket.id)) {
           user.socket.emit(event, game.getKnownData(user.id));
         }
       });
@@ -314,7 +326,12 @@ function registerClient(socket, player) {
 
   var getClientGameListData = function() {
     return _.map(
-      lobby.games,
+      _.filter(
+        lobby.games,
+        function(game) {
+          return game && !game.finished;
+        }
+      ),
       function(game) {
         return game.getKnownData();
       });
