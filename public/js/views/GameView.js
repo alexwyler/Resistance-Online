@@ -62,10 +62,10 @@ var GameView = exports.GameView = Backbone.View.extend({
 
   dismissSplash: function() {
     $(".splash").removeClass();
-  },                                                         
+  },
 
   showSplash: function(msg) {
     $(".splash_txt").html(msg);
     $(".splash").addClass("active");
-  }                                                         
+  }
 });

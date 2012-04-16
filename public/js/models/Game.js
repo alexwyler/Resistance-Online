@@ -55,6 +55,10 @@ var Game = exports.Game = ClientAwareModel.extend({
     return this.players.get(this.getClientID());
   },
 
+  amICreator: function() {
+    return this.getClientID() == this.get('creator');
+  },
+
   /**
    * Called when players or missions are added to this game.
    */

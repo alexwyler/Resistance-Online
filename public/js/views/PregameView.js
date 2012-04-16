@@ -25,16 +25,22 @@ var PregameView = exports.PregameView = Backbone.View.extend({
     this.$el.append('<div class="large">Current Players:</div>');
     this.$el.append(this._playersView.render().el);
 
-    if (this.model.game.getClientID()
-        != this.model.game.get('creator')) {
-      this.$el.prepend(
-        $(
-          '<div class="status">' +
-            'Waiting for game creator.' +
-          '</div>'
-         )
-      );
+    var pregame_status = null;
+    if (this.model.game.amICreator()) {
+      pregame_status = 'You are the game creator! Press start when ready.';
     } else {
+      pregame_status = 'Waiting for game creator.';
+    }
+
+    this.$el.prepend(
+      $(
+        '<div class="status">' +
+          pregame_status +
+          '</div>'
+      )
+    );
+
+    if (this.model.game.amICreator()) {
       this.$el.append(
         $(
           '<button id="start_game" class="bottom large full center">' +
