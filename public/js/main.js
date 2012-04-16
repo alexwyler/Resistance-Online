@@ -111,9 +111,7 @@ $(document).ready(function() {
     clientState.didLeaveGame();
   });
 
-  socket.on('player_join', function(game) {
-    clientState.game.players.reset(game.players);
-  });
+  socket.on('player_join', updateGameData);
 
   socket.on('player_leave', updateGameData);
 

@@ -63,7 +63,6 @@ var ClientState = exports.ClientState = Backbone.Model.extend({
   },
 
   didLeaveGame: function() {
-    this.game = null;
     this.trigger('leave_game');
   },
 

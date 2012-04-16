@@ -1,3 +1,4 @@
+var _ = require('underscore')._;
 var Backbone = require('backbone');
 var CollectionView = require('./CollectionView').CollectionView;
 var FacepileView = require('./FacepileView').FacepileView;
@@ -11,14 +12,19 @@ var GameListItemView = exports.GameListItemView = Backbone.View.extend({
   },
 
   initialize: function() {
+    _(this).bindAll();
+
     this._facepileView = new FacepileView({ collection: this.model.players });
+    this.model.on('change', this.render);
   },
 
   render: function() {
+    this.$el.empty();
     this.$el.append('<div class="large">Game ' + this.model.get('id') + '</div>');
     this.$el.append('<div class="float-left">&nbsp&nbsp players: &nbsp');
     this.$el.append(this._facepileView.render().el);
     this.$el.append('</div>');
+    this.$el.append('<div> status: ' + this.model.get('state') + '</div>');
   },
 
   joinGame: function() {

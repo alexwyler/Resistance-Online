@@ -208,6 +208,7 @@ function registerClient(socket, player) {
     'start_game',
     function(data) {
       user.game.startGame(user);
+      broadcastAll('update_game', user.game.getPublicData());
       broadcastGameData('start_game', user.game);
     }
   );
