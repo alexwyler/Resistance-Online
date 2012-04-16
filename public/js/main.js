@@ -70,6 +70,8 @@ $(document).ready(function() {
   });
 
   socket.on('mission_complete', updateGameData);
+  socket.on('mission_complete', handleMissionSplash);
+  socket.on('game_complete', handleGameSplash);
 
   socket.on('unchoose_player', function(player_id) {
     clientState.game.missions.last().party.remove(player_id);
@@ -94,6 +96,33 @@ $(document).ready(function() {
     game.setClientState(clientState);
     setTimeout(scrollToCurrent, 100);
     return game;
+  }
+
+  function handleMissionSplash(state) {
+    var completed_mission = state.missions[state.missions.length - 2];
+    var pass = _.reduce(completed_mission.actions, function(prev, mission) {
+      return prev && mission.mission_action == 'pass';
+    }, true);
+
+    if (pass) {
+      showSplash("MISSION SUCCESS");
+    } else {
+      showSplash("MISSION FAILED");  
+    }
+  }
+  
+  function handleGameSplash(state) {
+    if (state.passes > state.fails) {
+      showSplash('THE RESISTANCE WIN');  
+    } else {
+      showSplash('THE SPIES WIN');  
+    }
+    $('.splash').addClass('game_over');
+  }
+
+  function showSplash(msg) {
+    $('.splash_txt').html(msg);
+    $('.splash').addClass('active');
   }
 
   function scrollToCurrent() {

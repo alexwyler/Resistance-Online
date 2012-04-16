@@ -42,6 +42,7 @@ var EmptyGameListView = exports.EmptyGameListView = Backbone.View.extend({
 
 exports.GameListView = CollectionView.extend({
   tagName: 'ul',
+  className: 'game-list',
 
   createView: function(game) {
     return new GameListItemView({

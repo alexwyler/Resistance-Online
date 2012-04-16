@@ -92,6 +92,14 @@ body > button {
   padding: 10px;
 }
 
+.game-list {
+  overflow-y: scroll;
+  height: 290px;
+  border: 2px solid black;
+  padding: 10px;
+  list-style: none;
+}
+
 .mission .summary-view .status,
 .pregame-view .status {
   background: #e6ed80;
@@ -264,6 +272,7 @@ button.reject {
 
 .info_view {
   border: 2px solid black;
+  padding: 5px;
 }
 
 .large {
@@ -307,7 +316,16 @@ button.reject {
 }
 
 .splash_msg button {
+  margin: auto;            
   width: 200px;
   height: 50px;
-background-color: #273F66;
+  background-color: #273F66;
+}
+
+.splash button.exit {
+  display: none;
+}
+
+.splash.game_over button.exit {
+  display: block;
 }

@@ -8,10 +8,6 @@ var PregameView = require('./PregameView').PregameView;
 var GameView = exports.GameView = Backbone.View.extend({
   className: 'game-view',
 
-  events: {
-    'click .splash button': 'dismissSplash'
-  },
-
   initialize: function() {
     _(this).bindAll();
 
@@ -51,16 +47,6 @@ var GameView = exports.GameView = Backbone.View.extend({
 
     this.$el.append(this._subview.render().el);
 
-    this.$el.append('<div class="splash">'
-                    + '<div class="splash_msg">'
-                      + '<div class="splash_txt"></div>'
-                      + '<button class="large">okay</button>'
-                    + '</div>'
-                  + '</div>');
     return this;
-  },
-
-  dismissSplash: function() {
-    $(".splash").removeClass();
   }
 });

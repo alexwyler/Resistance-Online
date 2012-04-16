@@ -67,7 +67,7 @@ var MissionVoteView = Backbone.View.extend({
 
 var MissionViewData = Backbone.Model.extend({
   defaults: {
-    state: ''
+    state: '...'
   },
 
   initialize: function(options) {
@@ -135,11 +135,6 @@ var MissionViewData = Backbone.Model.extend({
     }
 
     this.set('state', new_state);
-  },
-
-  showSplash: function(msg) {
-    $(".splash_txt").html(msg);
-    $(".splash").addClass("active");
   }
 });
 
