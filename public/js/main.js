@@ -115,9 +115,7 @@ $(document).ready(function() {
     clientState.game.players.reset(game.players);
   });
 
-  socket.on('player_leave', function(game) {
-    clientState.game.players.reset(game.players);
-  });
+  socket.on('player_leave', updateGameData);
 
   socket.on('game_complete', updateGameData);
 });

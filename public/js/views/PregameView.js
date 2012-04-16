@@ -13,7 +13,7 @@ var PregameView = exports.PregameView = Backbone.View.extend({
       collection: this.model.game.players
     });
 
-    this.model.game.on('change', this.render);
+    this.model.game.on('change:creator', this.render);
   },
 
   clickStartGame: function() {
@@ -27,7 +27,7 @@ var PregameView = exports.PregameView = Backbone.View.extend({
 
     var pregame_status = null;
     if (this.model.game.amICreator()) {
-      pregame_status = 'You are the game creator! Press start when ready.';
+      pregame_status = 'You are the game creator.';
     } else {
       pregame_status = 'Waiting for game creator.';
     }

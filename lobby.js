@@ -1,3 +1,4 @@
+var _ = require('underscore')._;
 // player
 
 function Player(id) {
@@ -38,6 +39,9 @@ Game.prototype.addPlayer = function(player) {
 Game.prototype.removePlayer = function(player) {
   player.game = null;
   delete this.players[player.id];
+  if (this.creator.id == player.id && _.size(this.players) > 0) {
+    this.creator = _.first(_.toArray(this.players));
+  }
 }
 
 Game.prototype.isFinished = function() {
