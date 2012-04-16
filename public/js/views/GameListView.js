@@ -1,5 +1,6 @@
 var Backbone = require('backbone');
 var CollectionView = require('./CollectionView').CollectionView;
+var FacepileView = require('./FacepileView').FacepileView;
 
 var GameListItemView = exports.GameListItemView = Backbone.View.extend({
   tagName: 'li',

@@ -273,3 +273,41 @@ button.reject {
 .float-left {
   float: left;
 }
+
+.splash {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: inherit;
+  height: inherit;
+  background-color: rgba(0,0,0,.5);
+}
+
+.splash.active {
+  z-index: 10;
+}
+
+.splash_msg {
+  background-color: white;
+  border: solid 4px black;
+  border-radius: 16px;
+  margin: auto auto;
+  width: 280px;
+  height: 280px;
+  position: relative;
+  top: 70px;
+  text-align: center;
+  font-size: 42px;
+  font-weight: bold;
+}
+
+.splash_txt {
+  padding: 20px;
+}
+
+.splash_msg button {
+  width: 200px;
+  height: 50px;
+background-color: #273F66;
+}
