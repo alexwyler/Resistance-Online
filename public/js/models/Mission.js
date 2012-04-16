@@ -8,7 +8,7 @@ var PlayerList = require('./Player').PlayerList;
 var Vote = exports.Vote = Backbone.Model.extend({
   defaults: {
     user_id: null,
-    in_favor: null
+    vote: null
   }
 });
 

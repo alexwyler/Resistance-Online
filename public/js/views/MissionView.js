@@ -136,6 +136,11 @@ var MissionViewData = Backbone.Model.extend({
 
     this.set('state', new_state);
   },
+
+  showSplash: function(msg) {
+    $(".splash_txt").html(msg);
+    $(".splash").addClass("active");
+  }                                                         
 });
 
 /**
@@ -233,7 +238,7 @@ var MissionSummaryView = Backbone.View.extend({
     ].join('');
 
     var up_votes = this.model.mission.votes.filter(function(v) {
-      return v.get('in_favor');
+      return v.get('vote') == "yes";
     }).length;
 
     this.$el.html(Mustache.render(template, {
