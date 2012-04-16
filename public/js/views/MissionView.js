@@ -140,7 +140,7 @@ var MissionViewData = Backbone.Model.extend({
   showSplash: function(msg) {
     $(".splash_txt").html(msg);
     $(".splash").addClass("active");
-  }                                                         
+  }
 });
 
 /**

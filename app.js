@@ -167,7 +167,7 @@ function registerClient(socket, player) {
     function(data) {
       user.assertInGame();
       user.game.callMissionPartyToVote(user);
-      broadcastGameData('start_vote');
+      broadcastGameData('start_vote', user.game);
     }
   );
 
@@ -248,9 +248,9 @@ function registerClient(socket, player) {
     function(vote) {
       user.game.vote(user, vote);
       if (user.game.getInnerState() != resistance.M_STATE.VOTING) {
-        broadcastGameData('vote_complete');
+        broadcastGameData('vote_complete', user.game);
         if (user.game.finished) {
-          broadcastGameData('game_complete');
+          broadcastGameData('game_complete', user.game);
         }
       }
     }
@@ -261,9 +261,9 @@ function registerClient(socket, player) {
     function(action) {
       user.game.missionAct(user, action);
       if (user.game.getInnerState() != resistance.M_STATE.MISSIONING) {
-        broadcastGameData('mission_complete');
+        broadcastGameData('mission_complete', user.game);
         if (user.game.finished) {
-          broadcastGameData('game_complete');
+          broadcastGameData('game_complete', user.game);
         }
       }
     }
