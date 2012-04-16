@@ -44,11 +44,16 @@ var ScoreHeaderView = exports.ScoreHeaderView = Backbone.View.extend({
           var id = turn + "_" + attempt;
           $('#' + id)[0].scrollIntoView();
         }.bind(this, i, turn.attempt));
+      } else {
+        token.click(function(turn, attempt) {
+          var list = $('.mission-list')[0];
+          if (list) {
+            list.scrollTop = list.scrollHeight;
+          }
+        });
       }
       this.$el.append(token);
     }
-
     return this;
-  },
+  }
 });
-
