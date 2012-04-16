@@ -140,7 +140,7 @@ function registerClient(socket, player) {
       registerClient(botClient.player.socket, botClient.player);
       user.game.addPlayer(botClient.player);
       botClient.player.socket.emit('join_game', user.game);
-      broadcastGameData('player_join', user.game, true);
+      broadcastGameData('player_join', user.game, {skip_sender: true});
     }
   );
 
@@ -200,7 +200,7 @@ function registerClient(socket, player) {
       game.assertNotStarted();
       game.addPlayer(user);
       broadcastAll('player_join', game.getPublicData());
-      broadcastGameData('player_join', game, true);
+      broadcastGameData('player_join', game, {skip_sender: true});
       socket.emit('join_game', game.getKnownData(user.id));
     }
   );
@@ -251,7 +251,7 @@ function registerClient(socket, player) {
       if (user.game.getInnerState() != resistance.M_STATE.VOTING) {
         broadcastGameData('vote_complete', user.game);
         if (user.game.finished) {
-          broadcastGameData('game_complete', user.game);
+          broadcastGameData('game_complete', user.game, {send_to_all : true});
         }
       }
     }
@@ -264,7 +264,7 @@ function registerClient(socket, player) {
       if (user.game.getInnerState() != resistance.M_STATE.MISSIONING) {
         broadcastGameData('mission_complete', user.game);
         if (user.game.finished) {
-          broadcastGameData('game_complete', user.game);
+          broadcastGameData('game_complete', user.game, {send_to_all : true});
         }
       }
     }
@@ -295,15 +295,18 @@ function registerClient(socket, player) {
     broadcast(game.players, event, data, skip_sender);
   }
 
-  var broadcastGameData = function(event, game, skip_sender) {
+  var broadcastGameData = function(event, game, options) {
     if (!game) {
       game = user.game;
     }
+    options = options || {};
+    var users_to_send = options.send_to_all ? lobby.players : game.players;
+
     _.each(
-      game.players,
+      users_to_send,
       function(user) {
         if (!user.disconnected &&
-            (!skip_sender || socket.id != user.socket.id)) {
+            (!options.skip_sender || socket.id != user.socket.id)) {
           user.socket.emit(event, game.getKnownData(user.id));
         }
       });

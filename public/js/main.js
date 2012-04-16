@@ -71,7 +71,13 @@ $(document).ready(function() {
 
   socket.on('mission_complete', updateGameData);
   socket.on('mission_complete', handleMissionSplash);
-  socket.on('game_complete', handleGameSplash);
+  socket.on('game_complete', function(gameData) {
+    var game = updateGameData(gameData);
+    if (clientState.game
+        && clientState.game.id == game.id) {
+      handleGameSplash(gameData);
+    }
+  });
 
   socket.on('unchoose_player', function(player_id) {
     clientState.game.missions.last().party.remove(player_id);
@@ -144,7 +150,6 @@ $(document).ready(function() {
 
   socket.on('player_leave', updateGameData);
 
-  socket.on('game_complete', updateGameData);
 });
 
 window.test = function(){
