@@ -24,15 +24,15 @@ var MissionActView = Backbone.View.extend({
       '<button class="large reject bottom half right" data-action="{{fail}}">Fail</button>';
 
     this.$el.html(Mustache.render(template, {
-      yes: ACTION.PASS,
-      no: ACTION.FAIL
+      pass: ACTION.PASS,
+      fail: ACTION.FAIL
     }));
 
     return this;
   },
 
   doMissionAction: function(event) {
-    var action = event.target.dataset.vote;
+    var action = event.target.dataset.action;
     this.model.mission.doMissionAction(action);
     $('.act-view').addClass('voted');
   }

@@ -234,12 +234,13 @@ ResistanceGame.prototype.missionAct = function(player, action) {
 ResistanceGame.prototype.resolveMission = function() {
   var actions = this.current_actions;
   var current_mission = this.getCurrentMission();
+
   current_mission.actions = actions;
   var fails = 0;
   _.each(
     actions,
     function(action) {
-      fails += ACTION.FAIL;
+      fails += action == ACTION.FAIL ? 1 : 0;
     }
   );
 
