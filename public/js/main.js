@@ -51,6 +51,11 @@ $(document).ready(function() {
 
   socket.on('delete_game', function(game_id) {
     clientState.allGames.remove(game_id);
+    if (clientState.game &&
+        clientState.game.id == game_id) {
+      clientState.game = null;
+      clientState.didLeaveGame();
+    }
   });
 
   socket.on('start_vote', updateGameData);
