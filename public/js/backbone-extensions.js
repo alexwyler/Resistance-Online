@@ -35,7 +35,7 @@ Backbone.Model.prototype.parseCollection = function(data, collection_name) {
       _.each(raw_values, function(modelData) {
         var model = null;
         if (model = target.get(modelData.id)) {
-          model.set(modelData, { parse: true });
+          model.set(model.parse(modelData), { parse: true });
         } else {
           target.add(modelData, { parse: true });
         }
